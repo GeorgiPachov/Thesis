@@ -18,11 +18,14 @@ import javax.servlet.http.HttpServletResponse;
 import com.gpachov.masterthesis.DataPreprocessor;
 import com.gpachov.masterthesis.DataProviderWrapper;
 import com.gpachov.masterthesis.analyzer.DirectSentimentAnalyzer;
+import com.gpachov.masterthesis.classifiers.Classifier;
 import com.gpachov.masterthesis.classifiers.ClassifierResult;
+import com.gpachov.masterthesis.classifiers.LayeredBayesClassifier;
 import com.gpachov.masterthesis.classifiers.NaiveBayesClassifier;
 import com.gpachov.masterthesis.extract.Extractor;
 import com.gpachov.masterthesis.extract.RelevantSentenceExtractor;
 import com.gpachov.masterthesis.preprocessors.CompressSpacesPreprocessor;
+import com.gpachov.masterthesis.preprocessors.DefaultPreprocessor;
 import com.gpachov.masterthesis.preprocessors.Preprocessor;
 import com.gpachov.masterthesis.preprocessors.TagStrippingPreprocessor;
 import com.gpachov.masterthesis.reddit.RedditClient;
@@ -37,7 +40,7 @@ public class HomeServlet extends HttpServlet {
 			new CompressSpacesPreprocessor(), new TagStrippingPreprocessor());
 
 	private static final long serialVersionUID = 1L;
-	private NaiveBayesClassifier classifier;
+	private Classifier classifier;
 
 	@Override
 	public void init() throws ServletException {
@@ -156,11 +159,14 @@ public class HomeServlet extends HttpServlet {
 	}
 
 	private List<String> analyze(String sentence) {
+		String filteredSentence = new DefaultPreprocessor().applyPreprocessing(sentence);
+		
 		final DirectSentimentAnalyzer analyzer = new DirectSentimentAnalyzer(
-				Arrays.asList(sentence), classifier);
+				Arrays.asList(filteredSentence), classifier);
 
+		//XXX relying on analyzer working on 1 sentence
 		List<String> presentableResults = analyzer.analyze().entrySet()
-				.stream().map(e -> e.getKey() + " => " + e.getValue())
+				.stream().map(e -> sentence + " => " + e.getValue())
 				.collect(Collectors.toList());
 		return presentableResults;
 	}

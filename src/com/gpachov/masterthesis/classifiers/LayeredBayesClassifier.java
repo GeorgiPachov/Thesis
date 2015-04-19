@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import com.gpachov.masterthesis.ClassifierData;
 import com.gpachov.masterthesis.SampleData;
 import com.gpachov.masterthesis.utils.ConcatenatingSlidingWindowSpliterator;
 import com.gpachov.masterthesis.utils.LayeredBayesCache;
@@ -19,7 +20,7 @@ public class LayeredBayesClassifier extends Classifier {
 	private final Map<Integer, Integer> positiveNgramLayerWordCount = new HashMap<Integer, Integer>();
 	private final Map<Integer, Integer> negativeNgramLayerWordCount = new HashMap<Integer, Integer>();
 
-	public LayeredBayesClassifier(SampleData sampleData) {
+	public LayeredBayesClassifier(ClassifierData sampleData) {
 		super(sampleData);
 		sampleData.getPositive().forEach(
 				sentence -> {

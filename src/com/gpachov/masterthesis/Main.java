@@ -34,8 +34,8 @@ public class Main {
 
 		final DataPreprocessor dataPreprocessor = new DataPreprocessor(DataProviderWrapper.getInstance(),
 				getPreprocessors());
-//		final ClassifierFactory classifierFactory = s -> new NaiveBayesClassifier(s);
-		final ClassifierFactory classifierFactory = s -> new LayeredBayesClassifier(s);
+		final ClassifierFactory classifierFactory = s -> new NaiveBayesClassifier(s);
+//		final ClassifierFactory classifierFactory = s -> new LayeredBayesClassifier(s);
 
 		final CrossvalidatorSentimentAnalyzer crossvalidator = new CrossvalidatorSentimentAnalyzer(10,
 				classifierFactory, dataPreprocessor);

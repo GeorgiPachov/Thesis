@@ -9,14 +9,10 @@
 /home/georgi/EEworkspace/Diplomna/src/com/gpachov/masterthesis/preprocessors/CompressSpacesPreprocessor.java
 /home/georgi/EEworkspace/Diplomna/src/com/gpachov/masterthesis/utils/LayeredBayesCache.java
 /home/georgi/EEworkspace/Diplomna/src/com/gpachov/masterthesis/bing/BingClient.java
-/home/georgi/EEworkspace/Diplomna/src/com/gpachov/masterthesis/data/sources/GoogleSearchSource.java
-/home/georgi/EEworkspace/Diplomna/src/com/gpachov/masterthesis/datafetching/fetchers/FacebookDataFetcher.java
-/home/georgi/EEworkspace/Diplomna/src/com/gpachov/masterthesis/datafetching/fetchers/GoogleSearchDataFetcher.java
 /home/georgi/EEworkspace/Diplomna/src/com/gpachov/masterthesis/preprocessors/RemovingNonWordsPreprocessor.java
 /home/georgi/EEworkspace/Diplomna/src/com/gpachov/masterthesis/datafetching/fetchers/TwitterSearchDataFetcher.java
 /home/georgi/EEworkspace/Diplomna/src/com/gpachov/masterthesis/data/Entry.java
 /home/georgi/EEworkspace/Diplomna/src/com/gpachov/masterthesis/classifiers/ClassifierResult.java
-/home/georgi/EEworkspace/Diplomna/src/com/gpachov/masterthesis/data/sources/FacebookSource.java
 /home/georgi/EEworkspace/Diplomna/src/com/gpachov/masterthesis/reddit/RedditClient.java
 /home/georgi/EEworkspace/Diplomna/src/com/gpachov/masterthesis/preprocessors/Preprocessor.java
 /home/georgi/EEworkspace/Diplomna/src/com/gpachov/masterthesis/DataPreprocessor.java
@@ -52,7 +48,6 @@
 /home/georgi/EEworkspace/Diplomna/src/com/gpachov/masterthesis/dictionaries/EnglishDictionary.java
 /home/georgi/EEworkspace/Diplomna/src/com/gpachov/masterthesis/dbbuilder/DBBuilder.java
 /home/georgi/EEworkspace/Diplomna/src/com/gpachov/masterthesis/IDataPreprocessor.java
-/home/georgi/EEworkspace/Diplomna/src/com/gpachov/masterthesis/data/sources/GooglePlusSource.java
 /home/georgi/EEworkspace/Diplomna/src/com/gpachov/masterthesis/analyzer/SentimentAnalyzer.java
 /home/georgi/EEworkspace/Diplomna/src/com/gpachov/masterthesis/reddit/RedditClientImpl.java
 /home/georgi/EEworkspace/Diplomna/src/com/gpachov/masterthesis/classifiers/Classifier.java
@@ -62,6 +57,7 @@
 /home/georgi/EEworkspace/Diplomna/src/com/gpachov/mastertheysis/exceptions/InitializationException.java
 /home/georgi/EEworkspace/Diplomna/src/com/gpachov/masterthesis/extract/Extractor.java
 /home/georgi/EEworkspace/Diplomna/src/com/gpachov/masterthesis/classifiers/WordDictClassifier.java
+/home/georgi/EEworkspace/Diplomna/src/com/gpachov/masterthesis/dbbuilder/AmazonReviewsDBBuilder.java
 /home/georgi/EEworkspace/Diplomna/src/com/gpachov/masterthesis/data/sources/TwitterSource.java
 /home/georgi/EEworkspace/Diplomna/src/com/gpachov/masterthesis/datafetching/fetchers/DataFetcherFactory.java
 /home/georgi/EEworkspace/Diplomna/src/com/gpachov/masterthesis/utils/ConcatenatingSlidingWindowSpliterator.java
@@ -70,8 +66,8 @@
 /home/georgi/EEworkspace/Diplomna/src/com/gpachov/masterthesis/ClassifierData.java
 /home/georgi/EEworkspace/Diplomna/src/com/gpachov/masterthesis/data/RawDataEntry.java
 /home/georgi/EEworkspace/Diplomna/src/com/gpachov/masterthesis/progress/ProgressReport.java
-/home/georgi/EEworkspace/Diplomna/src/com/gpachov/masterthesis/datafetching/fetchers/GooglePlusDataFetcher.java
 /home/georgi/EEworkspace/Diplomna/src/com/gpachov/masterthesis/dbbuilder/GoodreadsDBBuilder.java
+/home/georgi/EEworkspace/Diplomna/src/com/gpachov/masterthesis/preprocessors/DefaultPreprocessor.java
 /home/georgi/EEworkspace/Diplomna/src/com/gpachov/masterthesis/dbbuilder/TripAdvisorJsonDbBuilder.java
 /home/georgi/EEworkspace/Diplomna/src/com/gpachov/masterthesis/dictionaries/SkipWordsDictionary.java
 /home/georgi/EEworkspace/Diplomna/src/com/gpachov/masterthesis/exceptions/InfrastructureException.java

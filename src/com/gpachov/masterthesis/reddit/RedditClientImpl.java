@@ -3,12 +3,12 @@ package com.gpachov.masterthesis.reddit;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.client.fluent.Request;
 import org.apache.http.message.BasicNameValuePair;
-import org.apache.tomcat.util.codec.binary.Base64;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -29,7 +29,6 @@ public class RedditClientImpl implements RedditClient {
 					.Get(MessageFormat.format(REDIT_SEARCH_API_MF, query))
 					.userAgent("bot 1.0 by /u/gpachov").execute()
 					.returnContent().asString();
-			System.out.println(jsonResponse);
 			JSONObject data = new JSONObject(jsonResponse)
 					.getJSONObject("data");
 			JSONArray children = data.getJSONArray("children");
@@ -50,7 +49,7 @@ public class RedditClientImpl implements RedditClient {
 				"client_credentials");
 
 		String credentialsString = Base64
-				.encodeBase64String("ue5CatWtOAtxtw:RHtiA85owI5YUX7-2A1xJA79p3M"
+				.getEncoder().encodeToString("ue5CatWtOAtxtw:RHtiA85owI5YUX7-2A1xJA79p3M"
 						.getBytes());
 		try {
 			String jsonResponse = Request
@@ -58,7 +57,6 @@ public class RedditClientImpl implements RedditClient {
 					.bodyForm(grantType).userAgent("bot 1.0 by /u/gpachov")
 					.addHeader("Authorization", "Basic " + credentialsString)
 					.execute().returnContent().asString();
-			System.out.println(jsonResponse);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -71,8 +69,10 @@ public class RedditClientImpl implements RedditClient {
 		redditClient.getUserOpinions(userInput).stream()
 				.map(o -> extractor.extractRelevant(o, userInput))
 				.forEach( s -> {
-					System.out.println(s);
-					System.out.println("----------------");
+					s.stream().forEach(se -> {
+						System.out.println(se);
+						System.out.println("-----");
+					});
 				});
 		;
 	}
