@@ -72,7 +72,7 @@ public class NaiveBayesClassifier extends Classifier {
 
 	private ClassifierResult classify(double positiveProbability,
 			double negativeProbability) {
-		if (positiveProbability > negativeProbability) {
+		if (positiveProbability >= negativeProbability) {
 			return ClassifierResult.GOOD;
 		} else {
 			return ClassifierResult.BAD;

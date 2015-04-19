@@ -17,7 +17,7 @@ import com.gpachov.masterthesis.extract.RelevantSentenceExtractor;
 
 public class RedditClientImpl implements RedditClient {
 
-	private static final String REDIT_SEARCH_API_MF = "http://www.reddit.com/search.json?q={0}&sort=new";
+	private static final String REDIT_SEARCH_API_MF = "http://www.reddit.com/search.json?q={0}&sort=new&limit=100";
 
 	@Override
 	public List<String> getUserOpinions(String query) {

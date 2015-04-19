@@ -131,6 +131,7 @@ public class HomeServlet extends HttpServlet {
 		}
 		final float positiveRates = ((float) positiveCount / (positiveCount + negativeCount));
 		String newLine = "<br/>";
+		result.append("Analyzed " + (positiveCount + negativeCount) + " opinions about "+ input + newLine);
 		result.append("Positive opinions: " + positiveRates * 100 + "%"
 				+ newLine);
 		result.append("Negative opinions: " + (1 - positiveRates) * 100 + "%"
