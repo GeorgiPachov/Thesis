@@ -12,6 +12,7 @@ public class DefaultPreprocessor implements Preprocessor {
 			add(new CompressSpacesPreprocessor());
 			add(new RemovingNonWordsPreprocessor());
 			add(new SkipWordsPreprocessor());
+			add(new WordCompactingPreprocessor());
 		}
 	};
 

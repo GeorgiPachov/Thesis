@@ -10,13 +10,17 @@ import com.gpachov.masterthesis.ClassifierData;
 import com.gpachov.masterthesis.SampleData;
 
 public class NaiveBayesClassifier extends Classifier {
-	private Map<String, Integer> positiveWordOccurences = new HashMap<String, Integer>();
-	private Map<String, Integer> negativeWordOccurences = new HashMap<String, Integer>();
-	private int totalPositiveWords;
-	private int totalNegativeWords;
+	protected Map<String, Integer> positiveWordOccurences = new HashMap<String, Integer>();
+	protected Map<String, Integer> negativeWordOccurences = new HashMap<String, Integer>();
+	protected int totalPositiveWords;
+	protected int totalNegativeWords;
 
 	public NaiveBayesClassifier(ClassifierData sampleData) {
 		super(sampleData);
+		init();
+	}
+
+	protected void init() {
 		StringBuilder positive = new StringBuilder();
 		StringBuilder negative = new StringBuilder();
 
@@ -45,7 +49,6 @@ public class NaiveBayesClassifier extends Classifier {
 				.map(e -> e.getValue()).reduce(Integer::sum).get();
 		this.totalNegativeWords = negativeWordOccurences.entrySet().stream()
 				.map(e -> e.getValue()).reduce(Integer::sum).get();
-
 	}
 
 	@Override
