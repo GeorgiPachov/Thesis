@@ -8,6 +8,7 @@ import java.util.Set;
 
 import com.gpachov.masterthesis.ClassifierData;
 import com.gpachov.masterthesis.SampleData;
+import com.gpachov.masterthesis.utils.Utils;
 
 public class NaiveBayesClassifier extends Classifier {
 	protected Map<String, Integer> positiveWordOccurences = new HashMap<String, Integer>();
@@ -75,11 +76,7 @@ public class NaiveBayesClassifier extends Classifier {
 
 	private ClassifierResult classify(double positiveProbability,
 			double negativeProbability) {
-		if (positiveProbability >= negativeProbability) {
-			return ClassifierResult.GOOD;
-		} else {
-			return ClassifierResult.BAD;
-		}
+		return Utils.classify(positiveProbability, negativeProbability);
 	}
 
 	private double getNegativeProbability(String s) {

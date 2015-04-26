@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.gpachov.masterthesis.ClassifierData;
+import com.gpachov.masterthesis.utils.Utils;
 
 public class BagOfWordsClassifier extends Classifier {
 
@@ -39,6 +40,6 @@ public class BagOfWordsClassifier extends Classifier {
 			sums[0] += positive;
 			sums[1] += negative;
 		});
-		return sums[0]>= sums[1]? ClassifierResult.GOOD : ClassifierResult.BAD;
+		return Utils.classify(sums);
 	}
 }

@@ -109,8 +109,8 @@ public class HomeServlet extends HttpServlet {
 		RedditClient redditClient = new RedditClientImpl();
 		List<String> redditOpinions = redditClient.getUserOpinions(input);
 		Extractor relevanceExtractor = new RelevantSentenceExtractor();
-		int positiveCount = 0;
-		int negativeCount = 0;
+		float score = 0.0f;
+		float maxScore = 0.0f;
 		for (String redditOpinion : redditOpinions) {
 			List<String> relevantSentences = relevanceExtractor
 					.extractRelevant(redditOpinion, input);
@@ -118,23 +118,17 @@ public class HomeServlet extends HttpServlet {
 				relevantSentence = preprocess(relevantSentence);
 				final DirectSentimentAnalyzer analyzer = new DirectSentimentAnalyzer(
 						Arrays.asList(relevantSentence), classifier);
-				if (analyzer.analyze().entrySet().iterator().next().getValue()
-						.equals(ClassifierResult.GOOD)) {
-					positiveCount++;
-					positiveSentences.add(relevantSentence);
-				} else if (analyzer.analyze().entrySet().iterator().next()
-						.getValue().equals(ClassifierResult.BAD)) {
-					negativeCount++;
-					negativeSentences.add(relevantSentence);
-				}
+				ClassifierResult value = analyzer.analyze().entrySet().iterator().next().getValue();
+				score+=value.equivalence();
+				maxScore+=1;
 			}
 		}
-		final float positiveRates = ((float) positiveCount / (positiveCount + negativeCount));
+		final float positivismScore = score/maxScore;
 		String newLine = "<br/>";
-		result.append("Analyzed " + (positiveCount + negativeCount) + " opinions about "+ input + newLine);
-		result.append("Positive opinions: " + positiveRates * 100 + "%"
+		result.append("Analyzed " + maxScore + " opinions about "+ input + newLine);
+		result.append("Positive opinions: " + positivismScore * 100 + "%"
 				+ newLine);
-		result.append("Negative opinions: " + (1 - positiveRates) * 100 + "%"
+		result.append("Negative opinions: " + (1 - positivismScore) * 100 + "%"
 				+ newLine);
 
 		result.append("Positive opinions about " + input + " " + newLine);

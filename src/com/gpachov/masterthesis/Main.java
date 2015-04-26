@@ -11,9 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import com.gpachov.masterthesis.analyzer.CrossvalidatorSentimentAnalyzer;
 import com.gpachov.masterthesis.classifiers.ClassifierFactory;
-import com.gpachov.masterthesis.classifiers.LayeredBayesClassifier;
 import com.gpachov.masterthesis.classifiers.NaiveBayesClassifier;
-import com.gpachov.masterthesis.classifiers.WordDictClassifier;
 import com.gpachov.masterthesis.data.RawDataEntry;
 import com.gpachov.masterthesis.datafetching.Query;
 import com.gpachov.masterthesis.datafetching.QueryImpl;
@@ -24,6 +22,7 @@ import com.gpachov.masterthesis.preprocessors.RemovingNonWordsPreprocessor;
 import com.gpachov.masterthesis.preprocessors.SkipWordsPreprocessor;
 import com.gpachov.masterthesis.preprocessors.TagStrippingPreprocessor;
 import com.gpachov.masterthesis.preprocessors.TrimmingPreprocessor;
+import com.gpachov.masterthesis.preprocessors.WordCompactingPreprocessor;
 
 public class Main {
 	private static final Logger logger = LoggerFactory.getLogger(Main.class);
@@ -54,6 +53,7 @@ public class Main {
 		preprocessors.add(new RemovingNonWordsPreprocessor());
 //		preprocessors.add(new SpellCorrectionPreprocessor());
 		preprocessors.add(new SkipWordsPreprocessor());
+		preprocessors.add(new WordCompactingPreprocessor());
 		return preprocessors.toArray(new Preprocessor[preprocessors.size()]);
 	}
 
@@ -62,7 +62,6 @@ public class Main {
 
 		final Stream<String> allTweetsStream = allData.stream().map(r -> r.getText());
 		final Collection<String> allTweets = allTweetsStream.collect(Collectors.toList());
-		final WordDictClassifier wordDictClassifier = new WordDictClassifier(null);
 		return allTweets;
 	}
 

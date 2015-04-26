@@ -58,11 +58,11 @@ public class CrossvalidatorSentimentAnalyzer implements SentimentAnalyzer {
 
 			for (Entry<String, ClassifierResult> entry : tempResult.entrySet()) {
 				if (positiveSamples.contains(entry.getKey())) {
-					if (entry.getValue().equals(ClassifierResult.GOOD)) {
+					if (ClassifierResult.Utils.isConsideredPositive(entry.getValue())) {
 						matchCount++;
 					}
 				} else if (negativeSamples.contains(entry.getKey())) {
-					if (entry.getValue().equals(ClassifierResult.BAD)) {
+					if (ClassifierResult.Utils.isConsideredNegative(entry.getValue())) {
 						matchCount++;
 					}
 				}

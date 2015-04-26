@@ -8,9 +8,9 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import com.gpachov.masterthesis.ClassifierData;
-import com.gpachov.masterthesis.SampleData;
 import com.gpachov.masterthesis.utils.ConcatenatingSlidingWindowSpliterator;
 import com.gpachov.masterthesis.utils.LayeredBayesCache;
+import com.gpachov.masterthesis.utils.Utils;
 
 public class LayeredBayesClassifier extends Classifier {
 
@@ -96,7 +96,7 @@ public class LayeredBayesClassifier extends Classifier {
 				(a, b) -> new double[] { a[0] * b[0], a[1] * b[1] });
 		double finalPositive = finalProbabilites[0];
 		double finalNegative = finalProbabilites[1];
-		return finalPositive > finalNegative ? ClassifierResult.GOOD : ClassifierResult.BAD;
+		return Utils.classify(finalPositive, finalNegative);
 	}
 
 	private double getNegativeProbability(String ngram, int ngramSize) {

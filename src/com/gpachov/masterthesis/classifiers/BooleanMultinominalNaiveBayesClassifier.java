@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.gpachov.masterthesis.ClassifierData;
+import com.gpachov.masterthesis.utils.Utils;
 
 public class BooleanMultinominalNaiveBayesClassifier extends Classifier {
 
@@ -53,8 +54,7 @@ public class BooleanMultinominalNaiveBayesClassifier extends Classifier {
 		double positiveProbability = finalResult[0];
 		double negativeProbability = finalResult[1];
 
-		ClassifierResult result = positiveProbability >= negativeProbability ? ClassifierResult.GOOD
-				: ClassifierResult.BAD;
+		ClassifierResult result = Utils.classify(positiveProbability, negativeProbability);
 
 		getProgressReport().onOpinionClassified(text, result);
 		return result;

@@ -29,13 +29,14 @@ public class BaseSentimentAnalyzer implements SentimentAnalyzer {
 			ClassifierResult classifierResult = classifier.classify(positiveExpectation);
 			map.put(positiveExpectation, classifierResult);
 
-			matchCount += (classifierResult == ClassifierResult.GOOD ? 1 : 0);
+			matchCount += ClassifierResult.Utils.isConsideredPositive(classifierResult) ? 1 : 0;
 		}
 
 		for (String negativeExpectation : sampleData.getNegativeSamples()) {
 			ClassifierResult classifierResult = classifier.classify(negativeExpectation);
 			map.put(negativeExpectation, classifierResult);
-			matchCount += (classifierResult == ClassifierResult.BAD ? 1 : 0);
+			
+			matchCount += ClassifierResult.Utils.isConsideredNegative(classifierResult) ? 1 : 0;
 		}
 		
 		this.matchRate = (matchCount / (2*sampleData.getSampleSize()));
