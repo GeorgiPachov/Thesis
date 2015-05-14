@@ -1,13 +1,16 @@
 package com.gpachov.masterthesis.classifiers;
 
-import com.gpachov.masterthesis.ClassifierData;
+import java.util.List;
+import java.util.Map;
+
+import com.gpachov.masterthesis.TrainingData;
 import com.gpachov.masterthesis.SampleData;
 import com.gpachov.masterthesis.progress.ProgressReporting;
 
 public abstract class Classifier implements ProgressReporting {
-	protected ClassifierData sampleData;
-	public Classifier(ClassifierData sampleData){
-		this.sampleData = sampleData;
+	protected Map<DataClass, List<String>> sampleData;
+	public Classifier(Map<DataClass, List<String>> trainingData){
+		this.sampleData = trainingData;
 	}
-	public abstract ClassifierResult classify(String text);
+	public abstract ClassificationResult classify(String text);
 }

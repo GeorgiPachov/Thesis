@@ -28,10 +28,9 @@ public class Main {
 	private static final Logger logger = LoggerFactory.getLogger(Main.class);
 
 	public static void main(final String[] args) {
-
 		final long start = System.currentTimeMillis();
 
-		final DataPreprocessor dataPreprocessor = new DataPreprocessor(DataProviderWrapper.getInstance(),
+		final DataPreprocessor dataPreprocessor = new DataPreprocessor(DatabaseDataProvider.getInstance(),
 				getPreprocessors());
 		final ClassifierFactory classifierFactory = s -> new NaiveBayesClassifier(s);
 //		final ClassifierFactory classifierFactory = s -> new LayeredBayesClassifier(s);

@@ -2,11 +2,11 @@ package com.gpachov.masterthesis.frontend;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.text.MessageFormat;
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import javax.servlet.ServletException;
@@ -16,11 +16,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.gpachov.masterthesis.DataPreprocessor;
-import com.gpachov.masterthesis.DataProviderWrapper;
+import com.gpachov.masterthesis.DatabaseDataProvider;
+import com.gpachov.masterthesis.TrainingData;
+import com.gpachov.masterthesis.TrainingDataBuilder;
 import com.gpachov.masterthesis.analyzer.DirectSentimentAnalyzer;
+import com.gpachov.masterthesis.classifiers.ClassificationResult;
 import com.gpachov.masterthesis.classifiers.Classifier;
-import com.gpachov.masterthesis.classifiers.ClassifierResult;
-import com.gpachov.masterthesis.classifiers.LayeredBayesClassifier;
+import com.gpachov.masterthesis.classifiers.DataClass;
 import com.gpachov.masterthesis.classifiers.NaiveBayesClassifier;
 import com.gpachov.masterthesis.extract.Extractor;
 import com.gpachov.masterthesis.extract.RelevantSentenceExtractor;
@@ -30,6 +32,8 @@ import com.gpachov.masterthesis.preprocessors.Preprocessor;
 import com.gpachov.masterthesis.preprocessors.TagStrippingPreprocessor;
 import com.gpachov.masterthesis.reddit.RedditClient;
 import com.gpachov.masterthesis.reddit.RedditClientImpl;
+import com.gpachov.masterthesis.utils.Pair;
+import com.gpachov.masterthesis.utils.Utils;
 
 /**
  * Servlet implementation class HomeServlet
@@ -47,8 +51,13 @@ public class HomeServlet extends HttpServlet {
 		super.init();
 		synchronized (HomeServlet.class) {
 			final DataPreprocessor dataPreprocessor = new DataPreprocessor(
-					DataProviderWrapper.getInstance());
-			this.classifier = new NaiveBayesClassifier(dataPreprocessor);
+					DatabaseDataProvider.getInstance());
+			//ugly hack, too lazy to to make another class-  will reuse the generic class with instance-1
+			final TrainingDataBuilder trainingDataBuilder = new TrainingDataBuilder(dataPreprocessor, 1);
+			
+			//i was in a hurry
+			TrainingData trainingData = trainingDataBuilder.iterator().next();
+			this.classifier = new NaiveBayesClassifier(trainingData.getAll());
 		}
 	}
 
@@ -56,7 +65,6 @@ public class HomeServlet extends HttpServlet {
 	 * Default constructor.
 	 */
 	public HomeServlet() {
-		// TODO Auto-generated constructor stub
 	}
 
 	/**
@@ -65,7 +73,6 @@ public class HomeServlet extends HttpServlet {
 	 */
 	protected void doGet(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {
-		// TODO Auto-generated method stub
 	}
 
 	/**
@@ -104,8 +111,7 @@ public class HomeServlet extends HttpServlet {
 
 	private String doAnalyzeBrand(String input) {
 		StringBuilder result = new StringBuilder();
-		List<String> positiveSentences = new ArrayList<String>();
-		List<String> negativeSentences = new ArrayList<String>();
+		Map<String,Float> allAnalyzedSentences = new LinkedHashMap<String, Float>();
 		RedditClient redditClient = new RedditClientImpl();
 		List<String> redditOpinions = redditClient.getUserOpinions(input);
 		Extractor relevanceExtractor = new RelevantSentenceExtractor();
@@ -118,8 +124,11 @@ public class HomeServlet extends HttpServlet {
 				relevantSentence = preprocess(relevantSentence);
 				final DirectSentimentAnalyzer analyzer = new DirectSentimentAnalyzer(
 						Arrays.asList(relevantSentence), classifier);
-				ClassifierResult value = analyzer.analyze().entrySet().iterator().next().getValue();
-				score+=value.equivalence();
+				Entry<String, Pair<DataClass, ClassificationResult>> entry = analyzer.analyze().entrySet().iterator().next();
+				ClassificationResult res = entry.getValue().getSecond();
+				String sentences = entry.getKey();
+				allAnalyzedSentences.put(sentences, Utils.scoreOf(res));
+				score+=Utils.scoreOf(res);
 				maxScore+=1;
 			}
 		}
@@ -132,11 +141,9 @@ public class HomeServlet extends HttpServlet {
 				+ newLine);
 
 		result.append("Positive opinions about " + input + " " + newLine);
-		positiveSentences.stream().forEach(
-				s -> result.append(s + " => POSITIVE" + " " + newLine));
-		result.append("Negative opinions about " + input + " :"  + newLine);
-		negativeSentences.stream().forEach(
-				s -> result.append(s + " => NEGATIVE" + newLine));
+		allAnalyzedSentences.forEach((k,v) -> {
+		    result.append(k + " => " + v + "<br/><br/>") ;
+		});
 		return result.toString();
 	}
 
@@ -161,7 +168,7 @@ public class HomeServlet extends HttpServlet {
 
 		//XXX relying on analyzer working on 1 sentence
 		List<String> presentableResults = analyzer.analyze().entrySet()
-				.stream().map(e -> sentence + " => " + e.getValue())
+				.stream().map(e -> sentence + "<br/> Positivity score  => " + e.getValue().getSecond())
 				.collect(Collectors.toList());
 		return presentableResults;
 	}

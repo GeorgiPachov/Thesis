@@ -3,10 +3,9 @@ package com.gpachov.masterthesis.progress;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.gpachov.masterthesis.IDataPreprocessor;
 import com.gpachov.masterthesis.PreprocessingInfo;
 import com.gpachov.masterthesis.SampleData;
-import com.gpachov.masterthesis.classifiers.ClassifierResult;
+import com.gpachov.masterthesis.classifiers.DataClass;
 
 public class CompositeProgressReport implements ProgressReport {
 
@@ -36,7 +35,7 @@ public class CompositeProgressReport implements ProgressReport {
 	}
 
 	@Override
-	public void onOpinionClassified(String opinion, ClassifierResult result) {
+	public void onOpinionClassified(String opinion, DataClass result) {
 		subscribers.forEach(s -> s.onOpinionClassified(opinion, result));
 	}
 

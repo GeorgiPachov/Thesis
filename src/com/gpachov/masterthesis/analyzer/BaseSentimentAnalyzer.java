@@ -1,20 +1,24 @@
 package com.gpachov.masterthesis.analyzer;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
-import com.gpachov.masterthesis.SampleData;
+import com.gpachov.masterthesis.classifiers.ClassificationResult;
 import com.gpachov.masterthesis.classifiers.Classifier;
-import com.gpachov.masterthesis.classifiers.ClassifierResult;
+import com.gpachov.masterthesis.classifiers.DataClass;
+import com.gpachov.masterthesis.utils.Pair;
+import com.gpachov.masterthesis.utils.Utils;
 
 public class BaseSentimentAnalyzer implements SentimentAnalyzer {
 	private Classifier classifier;
-	private SampleData sampleData;
 	private float matchRate;
+	Map<DataClass, List<String>> testData;
 
-	public BaseSentimentAnalyzer(Classifier classifier, SampleData sampleData){
+	public BaseSentimentAnalyzer(Classifier classifier, Map<DataClass, List<String>> testData){
 		this.classifier = classifier;
-		this.sampleData = sampleData;
+		this.testData = testData;
 		this.matchRate = 0.0f;
 	}
 	
@@ -22,24 +26,21 @@ public class BaseSentimentAnalyzer implements SentimentAnalyzer {
 	 * @see com.gpachov.masterthesis.Analyzer#analyze()
 	 */
 	@Override
-	public Map<String, ClassifierResult> analyze(){
-		Map<String, ClassifierResult> map = new HashMap<String, ClassifierResult>();
-		float matchCount = 0;
-		for (String positiveExpectation : sampleData.getPositiveSamples()) {
-			ClassifierResult classifierResult = classifier.classify(positiveExpectation);
-			map.put(positiveExpectation, classifierResult);
+	public Map<String, Pair<DataClass, ClassificationResult>> analyze(){
+	    Map<String, Pair<DataClass, ClassificationResult>> map = new LinkedHashMap<String, Pair<DataClass, ClassificationResult>>();
+		final AtomicInteger matchCount = new AtomicInteger(0);
 
-			matchCount += ClassifierResult.Utils.isConsideredPositive(classifierResult) ? 1 : 0;
-		}
-
-		for (String negativeExpectation : sampleData.getNegativeSamples()) {
-			ClassifierResult classifierResult = classifier.classify(negativeExpectation);
-			map.put(negativeExpectation, classifierResult);
-			
-			matchCount += ClassifierResult.Utils.isConsideredNegative(classifierResult) ? 1 : 0;
-		}
-		
-		this.matchRate = (matchCount / (2*sampleData.getSampleSize()));
+		testData.entrySet().stream().forEach( e-> {
+			DataClass dataClass = e.getKey();
+			List<String> sentences = e.getValue();
+			sentences.stream().forEach(s -> {
+				ClassificationResult classificationResult = classifier.classify(s);
+				map.put(s,new Pair<DataClass, ClassificationResult>(dataClass, classificationResult));
+				if (Utils.mapDataClassToClassifierResult(dataClass )== classificationResult) {
+					matchCount.incrementAndGet();
+				}
+			});
+		});
 		return map;
 	}
 	

@@ -1,15 +1,18 @@
 package com.gpachov.masterthesis.analyzer;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
+
+import javax.xml.ws.Holder;
 
 import com.gpachov.masterthesis.IDataProvider;
-import com.gpachov.masterthesis.SampleData;
+import com.gpachov.masterthesis.TrainingData;
+import com.gpachov.masterthesis.TrainingDataBuilder;
+import com.gpachov.masterthesis.classifiers.ClassificationResult;
 import com.gpachov.masterthesis.classifiers.Classifier;
 import com.gpachov.masterthesis.classifiers.ClassifierFactory;
-import com.gpachov.masterthesis.classifiers.ClassifierResult;
+import com.gpachov.masterthesis.classifiers.DataClass;
+import com.gpachov.masterthesis.utils.Pair;
 import com.gpachov.masterthesis.utils.Utils;
 
 public class CrossvalidatorSentimentAnalyzer implements SentimentAnalyzer {
@@ -31,45 +34,35 @@ public class CrossvalidatorSentimentAnalyzer implements SentimentAnalyzer {
 	}
 
 	@Override
-	public Map<String, ClassifierResult> analyze() {
-		final Map<String, ClassifierResult> result = new HashMap<String, ClassifierResult>();
+	public Map<String, Pair<DataClass, ClassificationResult>> analyze() {
+		final Map<String, Pair<DataClass, ClassificationResult>> result = new HashMap<String, Pair<DataClass, ClassificationResult>>();
 
-		int matchCount = 0;
-		for (int i = 0; i < crossValidationPieces; i++) {
-			List<String> negativeSentences = dataProviderWrapper.getNegative();
-			List<String> positiveSentences = dataProviderWrapper.getPositive();
-
-			int dataSampleSize = (int) (negativeSentences.size() / (float) crossValidationPieces);
-
-			List<String> positiveSamples = Utils.subList(positiveSentences, i * dataSampleSize, (i + 1)
-					* dataSampleSize);
-			positiveSentences.removeAll(positiveSamples);
-
-			List<String> negativeSamples = Utils.subList(negativeSentences, i * dataSampleSize, (i + 1)
-					* dataSampleSize);
-			negativeSentences.removeAll(negativeSamples);
-
-			SampleData sampleData = new SampleData(positiveSamples, negativeSamples, positiveSentences,
-					negativeSentences);
-			Classifier classifier = classifierFactory.newInstance(sampleData);
-			BaseSentimentAnalyzer analyzer = new BaseSentimentAnalyzer(classifier, sampleData);
-			Map<String, ClassifierResult> tempResult = analyzer.analyze();
-			result.putAll(tempResult);
-
-			for (Entry<String, ClassifierResult> entry : tempResult.entrySet()) {
-				if (positiveSamples.contains(entry.getKey())) {
-					if (ClassifierResult.Utils.isConsideredPositive(entry.getValue())) {
-						matchCount++;
-					}
-				} else if (negativeSamples.contains(entry.getKey())) {
-					if (ClassifierResult.Utils.isConsideredNegative(entry.getValue())) {
-						matchCount++;
-					}
+		Holder<Integer> matchCount = new Holder<Integer>();
+		matchCount.value = 0;
+		TrainingDataBuilder builder = new TrainingDataBuilder(dataProviderWrapper, crossValidationPieces);
+		for (TrainingData trainingData : builder){
+			Classifier classifier = classifierFactory.newInstance(trainingData.getReal());
+			Map<String, Pair<DataClass, ClassificationResult>> analyzed = new BaseSentimentAnalyzer(classifier, trainingData.getSamples()).analyze();
+			result.putAll(analyzed);
+			analyzed.entrySet().stream().forEach(e -> {
+				if (Utils.mapDataClassToClassifierResult(e.getValue().getFirst()) == e.getValue().getSecond()){
+					matchCount.value++;
 				}
-			}
+			});
 		}
-		this.matchRate = ((float) matchCount / result.size());
+		
+		this.matchRate = ((float) matchCount.value / result.size());
 		return result;
+	}
+
+	private DataClass findDataClassOf(TrainingData trainingData, String key) {
+		Holder<DataClass> holder = new Holder<DataClass>();
+		trainingData.getAll().forEach((k,v) -> {
+			if (v.contains(key)){
+				holder.value = k;
+			}
+		});
+		return holder.value;
 	}
 
 	@Override
