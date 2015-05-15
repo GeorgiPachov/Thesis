@@ -2,102 +2,120 @@ package com.gpachov.masterthesis.classifiers;
 
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
-import com.gpachov.masterthesis.ClassifierData;
-import com.gpachov.masterthesis.SampleData;
+import com.gpachov.masterthesis.utils.Utils;
 
 public class NaiveBayesClassifier extends Classifier {
-	protected Map<String, Integer> positiveWordOccurences = new HashMap<String, Integer>();
-	protected Map<String, Integer> negativeWordOccurences = new HashMap<String, Integer>();
-	protected int totalPositiveWords;
-	protected int totalNegativeWords;
+    protected static final boolean DEBUG = false;
+    protected Map<String, Map<DataClass, Integer>> wordPerDataClassMapping = new ConcurrentHashMap<String, Map<DataClass, Integer>>();
+    protected int totalWordCount;
+    protected Map<DataClass, Integer> wordCountPerDataClass = new HashMap<DataClass, Integer>();
+    private final Object mutex = new Object();
+    
+    public NaiveBayesClassifier(Map<DataClass, List<String>> trainingData) {
+	super(trainingData);
+	init();
+    }
 
-	public NaiveBayesClassifier(ClassifierData sampleData) {
-		super(sampleData);
-		init();
+    protected void init() {
+	super.sampleData.keySet().forEach(key -> {
+	    List<String> sentences = sampleData.get(key);
+	    sentences.parallelStream().flatMap(s -> Arrays.stream(s.split("\\s+"))).forEach(word -> {
+		HashMap<DataClass, Integer> initializedHashTable = new HashMap<DataClass, Integer>();
+		Arrays.stream(DataClass.values()).forEach(d -> initializedHashTable.put(d, 1));
+		wordPerDataClassMapping.putIfAbsent(word, initializedHashTable);
+		wordPerDataClassMapping.get(word).compute(key, (k, v) -> v + 1);
+	    });
+	});
+
+	wordPerDataClassMapping.entrySet().stream().forEach(e -> {
+	    totalWordCount += e.getValue().values().stream().reduce(Integer::sum).get();
+
+	    Arrays.stream(DataClass.values()).forEach(d -> wordCountPerDataClass.putIfAbsent(d, 1));
+
+	    e.getValue().entrySet().stream().forEach(entry -> {
+		wordCountPerDataClass.compute(entry.getKey(), (k, v) -> entry.getValue() + v);
+	    });
+	});
+    }
+
+    @Override
+    public ClassificationResult classify(String text) {
+	double[] finalResult = new double[DataClass.values().length];
+	for (int i = 0; i < finalResult.length; i++) {
+	    finalResult[i] = 100_000;
+	}
+	Arrays.stream(text.split("\\s+")).forEach(s -> {
+	    Map<DataClass, Double> probabilities = getScaledLikelyhood(s);
+	    for (int i = 0; i < DataClass.values().length; i++) {
+		DataClass current = DataClass.values()[i];
+		Double probabilityForDataClass = probabilities.get(current);
+		finalResult[i] *= probabilityForDataClass;
+	    }
+	    if (DEBUG){
+		System.out.println("After " + s + " => " + Arrays.toString(finalResult));
+	    }
+	});
+
+	DataClass result = null;
+	double maxProbability = Arrays.stream(finalResult).max().getAsDouble();
+	
+	for (int i = 0; i < finalResult.length; i++) {
+	    if (finalResult[i] == maxProbability) {
+		result = DataClass.values()[i];
+	    }
 	}
 
-	protected void init() {
-		StringBuilder positive = new StringBuilder();
-		StringBuilder negative = new StringBuilder();
-
-		sampleData.getPositive().forEach(s -> positive.append(" " + s + " "));
-		sampleData.getNegative().forEach(s -> negative.append(" " + s + " "));
-
-		Arrays.stream(positive.toString().split("\\s+")).forEach(s -> {
-			Integer old = positiveWordOccurences.get(s);
-			if (old == null) {
-				positiveWordOccurences.put(s, 1);
-			} else {
-				positiveWordOccurences.put(s, old + 1);
-			}
-		});
-
-		Arrays.stream(negative.toString().split("\\s+")).forEach(s -> {
-			Integer old = negativeWordOccurences.get(s);
-			if (old == null) {
-				negativeWordOccurences.put(s, 1);
-			} else {
-				negativeWordOccurences.put(s, old + 1);
-			}
-		});
-
-		this.totalPositiveWords = positiveWordOccurences.entrySet().stream()
-				.map(e -> e.getValue()).reduce(Integer::sum).get();
-		this.totalNegativeWords = negativeWordOccurences.entrySet().stream()
-				.map(e -> e.getValue()).reduce(Integer::sum).get();
+	//edge case override - all results are the same - pick neutral
+	if (Arrays.stream(finalResult).distinct().count() == 1){
+	    result = DataClass.NEUTRAL;
 	}
 
-	@Override
-	public ClassifierResult classify(String text) {
-		double[] finalResult = new double[2];
-		finalResult[0] = 1;
-		finalResult[1] = 1;
-		Arrays.stream(text.split("\\s+")).forEach(s -> {
-			double positiveProbability = getPositiveProbability(s);
-			double negativeProbability = getNegativeProbability(s);
+	getProgressReport().onOpinionClassified(text, result);
+	return mapToClassifierResult(result);
+    }
 
-			finalResult[0] *= positiveProbability;
-			finalResult[1] *= negativeProbability;
-		});
-		double positiveProbability = finalResult[0];
-		double negativeProbability = finalResult[1];
+    protected ClassificationResult mapToClassifierResult(DataClass result) {
+	return Utils.mapDataClassToClassifierResult(result);
+    }
 
-		ClassifierResult result = classify(positiveProbability,
-				negativeProbability);
-
-		getProgressReport().onOpinionClassified(text, result);
-		return result;
+    protected Map<DataClass, Double> getScaledLikelyhood(String s) {
+	Map<DataClass, Double> result = new HashMap<DataClass, Double>();
+	Map<DataClass, Integer> wordOccurences = wordPerDataClassMapping.get(s);
+	if (wordOccurences == null) {
+	    Arrays.stream(DataClass.values()).forEach(d -> result.put(d, 1.0));
+	    return result;	
 	}
 
-	private ClassifierResult classify(double positiveProbability,
-			double negativeProbability) {
-		if (positiveProbability >= negativeProbability) {
-			return ClassifierResult.GOOD;
-		} else {
-			return ClassifierResult.BAD;
-		}
-	}
+	wordOccurences.entrySet().forEach(entry -> {
+	    int occurences = entry.getValue();
+	    int classWordCount = wordCountPerDataClass.get(entry.getKey());
+	    double probability = ((double) occurences) / (totalWordCount + classWordCount);
+	    result.put(entry.getKey(), probability);
+	});
 
-	private double getNegativeProbability(String s) {
-		Integer occurences = negativeWordOccurences.get(s);
-		if (occurences == null) {
-			return (float) 1 / (totalNegativeWords + totalPositiveWords);
-		}
-		return occurences
-				/ ((float) negativeWordOccurences.size() + (totalNegativeWords + totalPositiveWords));
-	}
+	// 2nd idea -> just generate
 
-	private double getPositiveProbability(String s) {
-		Integer occurences = positiveWordOccurences.get(s);
-		if (occurences == null) {
-			return (float) 1 / (totalNegativeWords + totalPositiveWords);
-		}
-		return occurences
-				/ ((float) positiveWordOccurences.size() + (totalPositiveWords + totalNegativeWords));
-	}
+	 return result;
+//	return applyScales(s, result);
 
+    }
+
+    private Map<DataClass, Double> applyScales(String s, Map<DataClass, Double> result) {
+	Map<DataClass, Integer> wordOccurencesInClasses = wordPerDataClassMapping.get(s);
+	int totalWordCountInClasses;
+	if (wordOccurencesInClasses == null) {
+	    totalWordCountInClasses = DataClass.values().length;
+	    return result;
+	} else {
+	    totalWordCountInClasses = wordOccurencesInClasses.values().stream().reduce(Integer::sum).get();
+	    result.entrySet().stream().forEach(e -> {
+		result.compute(e.getKey(), (k, v) -> v / (double) totalWordCountInClasses);
+	    });
+	}
+	return result;
+    }
 }

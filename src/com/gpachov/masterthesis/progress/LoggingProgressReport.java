@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory;
 
 import com.gpachov.masterthesis.PreprocessingInfo;
 import com.gpachov.masterthesis.SampleData;
-import com.gpachov.masterthesis.classifiers.ClassifierResult;
+import com.gpachov.masterthesis.classifiers.DataClass;
 
 public class LoggingProgressReport implements ProgressReport{
 	private static final Logger logger = LoggerFactory.getLogger(LoggingProgressReport.class);
@@ -36,7 +36,7 @@ public class LoggingProgressReport implements ProgressReport{
 	}
 
 	@Override
-	public void onOpinionClassified(String opinion, ClassifierResult result) {
+	public void onOpinionClassified(String opinion, DataClass result) {
 		logger.trace(opinion + " classified as " + result);
 	}
 

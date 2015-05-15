@@ -1,54 +1,35 @@
 package com.gpachov.masterthesis;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
-public class SampleData implements ClassifierData {
-	private final List<String> positiveSamples;
-	private final List<String> negativeSamples;
-	private final List<String> positiveSentences;
-	private final List<String> negativeSentences;
-	private int sampleSize;
+import com.gpachov.masterthesis.classifiers.DataClass;
 
-	public SampleData(IDataProvider wrapper) {
-		List<String> negativeSentences = wrapper.getNegative();
-		List<String> positiveSenteces = wrapper.getPositive().subList(0, negativeSentences.size());
+public class SampleData implements TrainingData {
+	private Map<DataClass, List<String>> classified;
+	private Map<DataClass, List<String>> samples;
+	private Map<DataClass, List<String>> real;
 
-		this.sampleSize = (int) ((float) negativeSentences.size() / 10);
-
-		this.positiveSamples = positiveSenteces.subList(0, sampleSize);
-		this.negativeSamples = negativeSentences.subList(0, sampleSize);
-		this.positiveSentences = positiveSenteces.subList(sampleSize + 1, positiveSenteces.size() - 1);
-		this.negativeSentences = negativeSentences.subList(sampleSize + 1, negativeSentences.size() - 1);
+	public SampleData(Map<DataClass, List<String>> classified, Map<DataClass, List<String>> samples, Map<DataClass, List<String>> real) {
+		this.classified = classified;
+		this.samples = samples;
+		this.real = real;
 	}
 
-	public SampleData(List<String> positiveSamples, List<String> negativeSamples, List<String> positiveSentences,
-			List<String> negativeSentences) {
-		this.positiveSamples = positiveSamples;
-		this.negativeSamples = negativeSamples;
-		this.positiveSentences = positiveSentences;
-		this.negativeSentences = negativeSentences;
-		
-		this.sampleSize = negativeSamples.size();
+	@Override
+	public Map<DataClass, List<String>> getAll() {
+		return classified;
 	}
 
-	public List<String> getPositiveSamples() {
-		return new ArrayList<String>(positiveSamples);
+	@Override
+	public Map<DataClass, List<String>> getSamples() {
+		return samples;
 	}
 
-	public List<String> getNegativeSamples() {
-		return new ArrayList<String>(negativeSamples);
+	@Override
+	public Map<DataClass, List<String>> getReal() {
+		return real;
 	}
 
-	public List<String> getPositive() {
-		return new ArrayList<String>(positiveSentences);
-	}
-
-	public List<String> getNegative() {
-		return new ArrayList<String>(negativeSentences);
-	}
-
-	public float getSampleSize() {
-		return sampleSize;
-	}
 }

@@ -1,11 +1,12 @@
 package com.gpachov.masterthesis;
 
 import java.util.List;
+import java.util.Map;
 
-public interface IDataProvider extends ClassifierData {
+import com.gpachov.masterthesis.classifiers.DataClass;
 
-	public abstract List<String> getPositive();
-
-	public abstract List<String> getNegative();
+public interface IDataProvider {
+	public abstract List<String> getUnclassified();
+	public Map<DataClass, List<String>> getClassified();
 
 }
