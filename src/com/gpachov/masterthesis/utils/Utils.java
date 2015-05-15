@@ -32,17 +32,10 @@ public class Utils {
     }
 
     public static DataClass classify(double normalizedUserEvaluation) {
-	if (normalizedUserEvaluation < DataClass.WORST.upperLimit()) {
-	    return DataClass.WORST;
-	} else if (normalizedUserEvaluation < DataClass.BAD.upperLimit()) {
+	if (normalizedUserEvaluation < DataClass.BAD.upperLimit()) {
 	    return DataClass.BAD;
-	} else if (normalizedUserEvaluation < DataClass.NEUTRAL.upperLimit()) {
-	    return DataClass.NEUTRAL;
-	} else if (normalizedUserEvaluation < DataClass.GOOD.upperLimit()) {
-	    return DataClass.GOOD;
-	} else {
-	    return DataClass.GREAT;
 	}
+	return DataClass.GOOD;
     }
 
     public static DataClass classify(float[] probabilities) {

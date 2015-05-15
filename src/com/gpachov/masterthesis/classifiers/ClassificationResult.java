@@ -2,6 +2,6 @@ package com.gpachov.masterthesis.classifiers;
 
 public enum ClassificationResult {
     NEGATIVE,
-//    NEUTRAL,
+    NEUTRAL,
     POSITIVE
 }

@@ -9,6 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.gpachov.masterthesis.utils.Utils;
 
 public class NaiveBayesClassifier extends Classifier {
+    protected static final boolean DEBUG = false;
     protected Map<String, Map<DataClass, Integer>> wordPerDataClassMapping = new ConcurrentHashMap<String, Map<DataClass, Integer>>();
     protected int totalWordCount;
     protected Map<DataClass, Integer> wordCountPerDataClass = new HashMap<DataClass, Integer>();
@@ -54,6 +55,9 @@ public class NaiveBayesClassifier extends Classifier {
 		Double probabilityForDataClass = probabilities.get(current);
 		finalResult[i] *= probabilityForDataClass;
 	    }
+	    if (DEBUG){
+		System.out.println("After " + s + " => " + Arrays.toString(finalResult));
+	    }
 	});
 
 	DataClass result = null;
@@ -74,11 +78,11 @@ public class NaiveBayesClassifier extends Classifier {
 	return mapToClassifierResult(result);
     }
 
-    private ClassificationResult mapToClassifierResult(DataClass result) {
+    protected ClassificationResult mapToClassifierResult(DataClass result) {
 	return Utils.mapDataClassToClassifierResult(result);
     }
 
-    private Map<DataClass, Double> getScaledLikelyhood(String s) {
+    protected Map<DataClass, Double> getScaledLikelyhood(String s) {
 	Map<DataClass, Double> result = new HashMap<DataClass, Double>();
 	Map<DataClass, Integer> wordOccurences = wordPerDataClassMapping.get(s);
 	if (wordOccurences == null) {
@@ -89,7 +93,6 @@ public class NaiveBayesClassifier extends Classifier {
 	wordOccurences.entrySet().forEach(entry -> {
 	    int occurences = entry.getValue();
 	    int classWordCount = wordCountPerDataClass.get(entry.getKey());
-	    classWordCount = Math.max(classWordCount, 1);
 	    double probability = ((double) occurences) / (totalWordCount + classWordCount);
 	    result.put(entry.getKey(), probability);
 	});

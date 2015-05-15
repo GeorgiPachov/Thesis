@@ -22,8 +22,8 @@ public class TrainingDataBuilder implements Iterable<TrainingData> {
 	Map<DataClass, List<String>> classified = provider.getClassified();
 
 //	 equal portions in every data class
-	int class1Size = classified.get(DataClass.WORST).size() + classified.get(DataClass.BAD).size() + classified.get(DataClass.NEUTRAL).size();
-	int class3Size = classified.get(DataClass.GOOD).size() + classified.get(DataClass.GREAT).size() + classified.get(DataClass.NEUTRAL).size();
+	int class1Size = classified.get(DataClass.BAD).size();
+	int class3Size = classified.get(DataClass.GOOD).size();
 	final int minSentencesPerDataClass = IntStream.of(class1Size, class3Size).min().getAsInt();
 	classified.keySet().stream().forEach(key -> {
 	    List<String> limited = classified.get(key).stream().limit(minSentencesPerDataClass).collect(Collectors.toList());

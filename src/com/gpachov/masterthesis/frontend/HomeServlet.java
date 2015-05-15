@@ -24,7 +24,9 @@ import com.gpachov.masterthesis.classifiers.ClassificationResult;
 import com.gpachov.masterthesis.classifiers.Classifier;
 import com.gpachov.masterthesis.classifiers.DataClass;
 import com.gpachov.masterthesis.classifiers.NaiveBayesClassifier;
+import com.gpachov.masterthesis.classifiers.SentimentLexiconSimpleClassifier;
 import com.gpachov.masterthesis.extract.Extractor;
+import com.gpachov.masterthesis.extract.LinguisticSentenceExtractor;
 import com.gpachov.masterthesis.extract.RelevantSentenceExtractor;
 import com.gpachov.masterthesis.preprocessors.CompressSpacesPreprocessor;
 import com.gpachov.masterthesis.preprocessors.DefaultPreprocessor;
@@ -40,9 +42,6 @@ import com.gpachov.masterthesis.utils.Utils;
  */
 @WebServlet("/analyze")
 public class HomeServlet extends HttpServlet {
-	private static final List<Preprocessor> preprocessors = Arrays.asList(
-			new CompressSpacesPreprocessor(), new TagStrippingPreprocessor());
-
 	private static final long serialVersionUID = 1L;
 	private Classifier classifier;
 
@@ -57,7 +56,7 @@ public class HomeServlet extends HttpServlet {
 			
 			//i was in a hurry
 			TrainingData trainingData = trainingDataBuilder.iterator().next();
-			this.classifier = new NaiveBayesClassifier(trainingData.getAll());
+			this.classifier = new SentimentLexiconSimpleClassifier(trainingData.getAll());
 		}
 	}
 
@@ -111,10 +110,10 @@ public class HomeServlet extends HttpServlet {
 
 	private String doAnalyzeBrand(String input) {
 		StringBuilder result = new StringBuilder();
-		Map<String,Float> allAnalyzedSentences = new LinkedHashMap<String, Float>();
+		Map<String,ClassificationResult> allAnalyzedSentences = new LinkedHashMap<String, ClassificationResult>();
 		RedditClient redditClient = new RedditClientImpl();
 		List<String> redditOpinions = redditClient.getUserOpinions(input);
-		Extractor relevanceExtractor = new RelevantSentenceExtractor();
+		Extractor relevanceExtractor = new LinguisticSentenceExtractor();
 		float score = 0.0f;
 		float maxScore = 0.0f;
 		for (String redditOpinion : redditOpinions) {
@@ -127,7 +126,7 @@ public class HomeServlet extends HttpServlet {
 				Entry<String, Pair<DataClass, ClassificationResult>> entry = analyzer.analyze().entrySet().iterator().next();
 				ClassificationResult res = entry.getValue().getSecond();
 				String sentences = entry.getKey();
-				allAnalyzedSentences.put(sentences, Utils.scoreOf(res));
+				allAnalyzedSentences.put(sentences, res);
 				score+=Utils.scoreOf(res);
 				maxScore+=1;
 			}
@@ -148,11 +147,7 @@ public class HomeServlet extends HttpServlet {
 	}
 
 	private String preprocess(String relevantSentence) {
-		String finalSentence = relevantSentence;
-		for (Preprocessor pre : preprocessors) {
-			finalSentence = pre.applyPreprocessing(finalSentence);
-		}
-		return finalSentence;
+		return new DefaultPreprocessor().applyPreprocessing(relevantSentence);
 	}
 
 	private String test(String input) throws IOException {

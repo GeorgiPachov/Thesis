@@ -31,12 +31,13 @@ public class LinguisticSentenceExtractor implements Extractor {
 	int sentEndTok = 0;
 	for (int i = 0; i < sentenceBoundaries.length; ++i) {
 	    sentEndTok = sentenceBoundaries[i];
-	    System.out.println("SENTENCE "+(i+1)+": ");
 	    StringBuilder sentence = new StringBuilder();
 	    for (int j=sentStartTok; j <= sentEndTok; j++) {
 		sentence.append(tokenArray[j] + whites[j+1]);
 	    }
-	    result.add(sentence.toString());
+	    if (sentence.toString().contains(relevant)) {
+		result.add(sentence.toString());
+	    }
 	    sentStartTok = sentEndTok+1;
 	}
 	return result;
