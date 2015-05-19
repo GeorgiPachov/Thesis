@@ -134,6 +134,16 @@
 			<version>4.1.0</version>
 		</dependency>
 		<dependency>
+			<groupId>org.jaws</groupId>
+			<artifactId>org.jaws.jar</artifactId>
+			<version>1.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.stanford</groupId>
+			<artifactId>org.stanford.jar</artifactId>
+			<version>1.0</version>
+		</dependency>
+		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>4.12</version>

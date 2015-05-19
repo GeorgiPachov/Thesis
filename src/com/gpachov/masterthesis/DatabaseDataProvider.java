@@ -33,7 +33,7 @@ public class DatabaseDataProvider implements IDataProvider {
 		this.mongo = new DbConnectionFactory().newConnection();
 		Map<String, Double> allStrings = new LinkedHashMap<>();
 		readFromGoodreadsCollection(allStrings);
-		readFromTripAdvisorCollection(allStrings);
+//		readFromTripAdvisorCollection(allStrings);
 //		readFromAmazon(allStrings);
 
 		// add to unclassified

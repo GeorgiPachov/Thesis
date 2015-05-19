@@ -8,15 +8,17 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.management.RuntimeErrorException;
 
 import com.gpachov.masterthesis.classifiers.SentimentLexiconSimpleClassifier;
 import com.gpachov.masterthesis.dictionaries.SkipWordsDictionary;
 
-public class AdvancedSentimentLexicon {
+public class AdvancedSentimentLexicon implements SentimentLexicon{
     private static final URL SENTIMENT_LEXICON_FILE = AdvancedSentimentLexicon.class.getClassLoader().getResource("resources/lexicon.txt");
     private static final String TYPE_KEY = "type";
     private static final String STRONG_SUBJ = "strongsubj";
@@ -59,8 +61,23 @@ public class AdvancedSentimentLexicon {
 	}
     }
     
+    @Override
     public float getScore(String word){
 	return wordSentimentLexicon.getOrDefault(word, 0.0f);
     }
     
+    @Override
+    public List<String> getAllPositive() {
+	return wordSentimentLexicon.entrySet().stream().filter(e -> e.getValue() > 0).map(e -> e.getKey()).collect(Collectors.toList());
+    }
+    
+    @Override
+    public List<String> getAllNegative(){
+	return wordSentimentLexicon.entrySet().stream().filter(e -> e.getValue() < 0).map(e -> e.getKey()).collect(Collectors.toList());
+    }
+    
+    @Override
+    public List<String> getAllNeutral(){
+   	return wordSentimentLexicon.entrySet().stream().filter(e -> e.getValue() == 0).map(e -> e.getKey()).collect(Collectors.toList());
+    }
 }

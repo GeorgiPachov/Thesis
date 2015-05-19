@@ -5,9 +5,11 @@ import java.util.List;
 import java.util.Map;
 
 import com.gpachov.masterthesis.lexicon.AdvancedSentimentLexicon;
+import com.gpachov.masterthesis.lexicon.SentimentLexicon;
+import com.gpachov.masterthesis.lexicon.WordNetLexiconDecorator;
 
 public class SentimentLexiconSimpleClassifier extends Classifier {
-    private AdvancedSentimentLexicon lexicon = new AdvancedSentimentLexicon();
+    private SentimentLexicon lexicon = new WordNetLexiconDecorator(new AdvancedSentimentLexicon());
 
     public SentimentLexiconSimpleClassifier(Map<DataClass, List<String>> trainingData) {
 	super(trainingData);
