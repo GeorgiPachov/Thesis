@@ -33,9 +33,12 @@ public class PosTokenizer {
 		    case PRONOUN:
 			result.add(new Pronoun(realWord));
 			break;
-		    default:
-			result.add(new PosToken(realWord, PosType.OTHER));
-			break;
+//		    case DETERMINER:
+//			result.add(new Determiner(realWord));
+//			break;
+//		    default:
+//			result.add(new PosToken(realWord, PosType.OTHER));
+//			break;
 		    }
 		}
 	    }

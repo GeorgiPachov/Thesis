@@ -19,6 +19,8 @@ public class ExtractionEngine {
 	binding.put('v', PosType.VERB);
 	binding.put('d', PosType.ADVERB);
 	binding.put('p', PosType.PRONOUN);
+	binding.put('t', PosType.DETERMINER);
+	
     }
     private List<String> formulas;
 
@@ -34,9 +36,30 @@ public class ExtractionEngine {
 	for (String formulaRegexModel : formulas){
 	    Pattern formulaPattern = Pattern.compile(formulaRegexModel);
 	    Matcher matcher = formulaPattern.matcher(sentenceModelAsRegex);
+	    
+	    int[] intervalIndex = new int[2048];
 	    while (matcher.find()){
 		int groupBeginIndex = matcher.start();
 		int groupEndIndex = matcher.end();
+		
+		boolean anotherPhraseCollision = false;
+		for (int i = groupBeginIndex; i >= 0; i--){
+		    if (intervalIndex[i] >= groupBeginIndex){
+			anotherPhraseCollision = true;
+		    }
+		}
+		
+		for (int i = groupBeginIndex ; i < groupEndIndex; i++){
+		    if (intervalIndex[i] != 0){
+			anotherPhraseCollision = true;
+		    }
+		}
+		if (anotherPhraseCollision){
+		    continue;
+		}
+		//update indexes
+		intervalIndex[groupBeginIndex] = groupEndIndex;
+		
 		List<PosToken> tokens = model.getTokenOrderedList().subList(groupBeginIndex, groupEndIndex); //is exclusive
 		String simplifiedSentence = tokens.stream().map(PosToken::getRawWord).collect(Collectors.joining(" "));
 		results.add(new SentenceModel(simplifiedSentence));

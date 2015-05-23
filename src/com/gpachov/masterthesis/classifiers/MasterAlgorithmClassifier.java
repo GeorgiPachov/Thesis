@@ -17,20 +17,14 @@ public class MasterAlgorithmClassifier extends Classifier {
     private SentimentLexicon lexicon = new AdvancedSentimentLexicon();
     private static final List<String> formulas = new ArrayList<String>() {
 	{
-	    add("a{1,10}n");
-	    add("pva");
+	    add("[np]va{1,10}n"); //beds were amazingly good
+	    add("[np]va"); //beds were bad
+	    add("a{1,10}n"); //absolutely great house
+	    add("da"); //amazingly correct
+//	    add("dan"); //amazingly correct
 	}
     };
     private ExtractionEngine extractionEngine = new ExtractionEngine(formulas);
-    // private List<PhraseFormula> phraseFormula = new
-    // ArrayList<PhraseFormula>() {
-    // {
-    // add(new AdjectiveNounAnything());
-    // add(new AdjectiveAdjectiveNoun());
-    // add(new NounVerbAdjective());
-    //
-    // }
-    // };
 
     private SimpleLexiconClassifier classifier;
 
@@ -42,16 +36,10 @@ public class MasterAlgorithmClassifier extends Classifier {
     @Override
     public ClassificationResult classify(String text) {
 	List<String> sentences = splitSentences(text);
-	// List<Phrase> phrases = new ArrayList<>();
 	List<SentenceModel> allSimplifiedSentences = new ArrayList<SentenceModel>();
 	for (String sentence : sentences) {
 	    List<SentenceModel> simplifiedSentence = extractionEngine.extractSimplifiedSentences(sentence);
 	    allSimplifiedSentences.addAll(simplifiedSentence);
-	    
-	    // SentenceModel model = new SentenceModel(sentence);
-	    // for (PhraseFormula formula : phraseFormula) {
-	    // phrases.addAll(formula.extract(model));
-	    // }
 	}
 
 	int[] sentimentScore = new int[1];
@@ -69,7 +57,7 @@ public class MasterAlgorithmClassifier extends Classifier {
 	ClassificationResult result = classify(sentimentScore);
 	if (Constants.DEBUG_CLASSIFIER) {
 	    System.out.println();
-	    System.out.println(/*text + */"=> [ " + allSimplifiedSentences.stream().map(SentenceModel::getRawSentence).collect(Collectors.joining(", ")) + " ]");
+	    System.out.println(text + "\n=> [ " + allSimplifiedSentences.stream().map(SentenceModel::getRawSentence).collect(Collectors.joining(", ")) + " ]");
 	    System.out.println("-------");
 	}
 	return result;

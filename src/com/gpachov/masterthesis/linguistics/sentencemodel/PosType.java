@@ -37,6 +37,12 @@ public enum PosType {
 	public List<String> representation() {
 	    return Arrays.asList("PRP");
 	}
+    }, DETERMINER{
+	@Override
+	public List<String> representation() {
+	    return Arrays.asList("DT");
+	}
+	
     };
     public abstract List<String> representation();
 }
