@@ -32,6 +32,11 @@ public enum PosType {
 	public List<String> representation(){
 	    return Arrays.asList();
 	}
+    }, PRONOUN {
+	@Override
+	public List<String> representation() {
+	    return Arrays.asList("PRP");
+	}
     };
     public abstract List<String> representation();
 }

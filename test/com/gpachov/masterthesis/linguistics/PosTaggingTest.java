@@ -6,14 +6,14 @@ import org.junit.Test;
 
 import com.gpachov.masterthesis.linguistics.sentencemodel.PosToken;
 import com.gpachov.masterthesis.linguistics.sentencemodel.PosTokenizer;
-import com.gpachov.masterthesis.linguistics.sentencemodel.Sentence;
+import com.gpachov.masterthesis.linguistics.sentencemodel.SentenceModel;
 
 public class PosTaggingTest {
 
     @Test
     public void test() {
 	String input = "I am majestically stupid";
-	Sentence sentence = new Sentence(input);
+	SentenceModel sentence = new SentenceModel(input);
 	for (PosToken posToken : sentence){
 	    assertNotNull(posToken);
 	}

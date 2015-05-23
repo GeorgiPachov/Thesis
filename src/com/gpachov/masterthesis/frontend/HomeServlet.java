@@ -22,7 +22,7 @@ import com.gpachov.masterthesis.classifiers.ClassificationResult;
 import com.gpachov.masterthesis.classifiers.Classifier;
 import com.gpachov.masterthesis.classifiers.DataClass;
 import com.gpachov.masterthesis.classifiers.MasterAlgorithmClassifier;
-import com.gpachov.masterthesis.extract.Extractor;
+import com.gpachov.masterthesis.extract.SentenceExtractor;
 import com.gpachov.masterthesis.extract.LinguisticSentenceExtractor;
 import com.gpachov.masterthesis.filter.SkipEmptyOpinions;
 import com.gpachov.masterthesis.preprocessors.DefaultPreprocessor;
@@ -106,7 +106,7 @@ public class HomeServlet extends HttpServlet {
 	Map<String, ClassificationResult> allAnalyzedSentences = new LinkedHashMap<String, ClassificationResult>();
 	RedditClient redditClient = new RedditClientImpl();
 	List<String> redditOpinions = redditClient.getUserOpinions(input);
-	Extractor relevanceExtractor = new LinguisticSentenceExtractor();
+	SentenceExtractor relevanceExtractor = new LinguisticSentenceExtractor();
 	float score = 0.0f;
 	float maxScore = 0.0f;
 	for (String redditOpinion : redditOpinions) {

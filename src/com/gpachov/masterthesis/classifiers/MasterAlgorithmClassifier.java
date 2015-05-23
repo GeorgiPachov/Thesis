@@ -3,29 +3,34 @@ package com.gpachov.masterthesis.classifiers;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.gpachov.masterthesis.Constants;
 import com.gpachov.masterthesis.extract.LinguisticSentenceExtractor;
 import com.gpachov.masterthesis.lexicon.AdvancedSentimentLexicon;
 import com.gpachov.masterthesis.lexicon.SentimentLexicon;
-import com.gpachov.masterthesis.linguistics.Phrase;
-import com.gpachov.masterthesis.linguistics.formula.AdjectiveAdjectiveNoun;
-import com.gpachov.masterthesis.linguistics.formula.AdjectiveNounAnything;
-import com.gpachov.masterthesis.linguistics.formula.NounVerbAdjective;
-import com.gpachov.masterthesis.linguistics.formula.PhraseFormula;
+import com.gpachov.masterthesis.linguistics.sentencemodel.ExtractionEngine;
 import com.gpachov.masterthesis.linguistics.sentencemodel.PosToken;
-import com.gpachov.masterthesis.linguistics.sentencemodel.Sentence;
+import com.gpachov.masterthesis.linguistics.sentencemodel.SentenceModel;
 
 public class MasterAlgorithmClassifier extends Classifier {
     private SentimentLexicon lexicon = new AdvancedSentimentLexicon();
-    private List<PhraseFormula> phraseFormula = new ArrayList<PhraseFormula>() {
+    private static final List<String> formulas = new ArrayList<String>() {
 	{
-	    add(new AdjectiveNounAnything());
-	    add(new AdjectiveAdjectiveNoun());
-	    add(new NounVerbAdjective());
-	    
+	    add("a{1,10}n");
+	    add("pva");
 	}
     };
+    private ExtractionEngine extractionEngine = new ExtractionEngine(formulas);
+    // private List<PhraseFormula> phraseFormula = new
+    // ArrayList<PhraseFormula>() {
+    // {
+    // add(new AdjectiveNounAnything());
+    // add(new AdjectiveAdjectiveNoun());
+    // add(new NounVerbAdjective());
+    //
+    // }
+    // };
 
     private SimpleLexiconClassifier classifier;
 
@@ -37,30 +42,34 @@ public class MasterAlgorithmClassifier extends Classifier {
     @Override
     public ClassificationResult classify(String text) {
 	List<String> sentences = splitSentences(text);
-	List<Phrase> phrases = new ArrayList<>();
+	// List<Phrase> phrases = new ArrayList<>();
+	List<SentenceModel> allSimplifiedSentences = new ArrayList<SentenceModel>();
 	for (String sentence : sentences) {
-	    Sentence model = new Sentence(sentence);
-	    for (PhraseFormula formula : phraseFormula) {
-		phrases.addAll(formula.extract(model));
-	    }
+	    List<SentenceModel> simplifiedSentence = extractionEngine.extractSimplifiedSentences(sentence);
+	    allSimplifiedSentences.addAll(simplifiedSentence);
+	    
+	    // SentenceModel model = new SentenceModel(sentence);
+	    // for (PhraseFormula formula : phraseFormula) {
+	    // phrases.addAll(formula.extract(model));
+	    // }
 	}
 
 	int[] sentimentScore = new int[1];
-	for (Phrase phrase : phrases) {
-	    for (PosToken posToken : phrase.getPhraseTokens()) {
+	allSimplifiedSentences.stream().forEach(sm -> {
+	    for (PosToken posToken : sm.getTokenOrderedList()) {
 		float score = lexicon.getScore(posToken.getRawWord());
 		if (score != 0.0f) {
 		    if (Constants.DEBUG_CLASSIFIER) {
-			System.out.println(" Assigning " + score + " to " + posToken.getRawWord());
+//			System.out.println(" Assigning " + score + " to " + posToken.getRawWord());
 		    }
 		}
 		sentimentScore[0] += score;
-
 	    }
-	}
+	});
 	ClassificationResult result = classify(sentimentScore);
 	if (Constants.DEBUG_CLASSIFIER) {
-	    System.out.println(text + "=>" + phrases);
+	    System.out.println();
+	    System.out.println(/*text + */"=> [ " + allSimplifiedSentences.stream().map(SentenceModel::getRawSentence).collect(Collectors.joining(", ")) + " ]");
 	    System.out.println("-------");
 	}
 	return result;

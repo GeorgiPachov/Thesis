@@ -12,7 +12,7 @@ import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import com.gpachov.masterthesis.extract.Extractor;
+import com.gpachov.masterthesis.extract.SentenceExtractor;
 import com.gpachov.masterthesis.extract.LinguisticSentenceExtractor;
 import com.gpachov.masterthesis.extract.RelevantSentenceExtractor;
 
@@ -66,7 +66,7 @@ public class RedditClientImpl implements RedditClient {
 	public static void main(String[] args) {
 		final String userInput = "Samsung";
 		RedditClient redditClient = new RedditClientImpl();
-		Extractor extractor = new LinguisticSentenceExtractor();
+		SentenceExtractor extractor = new LinguisticSentenceExtractor();
 		redditClient.getUserOpinions(userInput).stream()
 				.map(o -> extractor.extractRelevant(o, userInput))
 				.forEach( s -> {

@@ -7,7 +7,7 @@ import java.util.Map;
 import com.gpachov.masterthesis.linguistics.Phrase;
 import com.gpachov.masterthesis.linguistics.PhraseExtractor;
 import com.gpachov.masterthesis.linguistics.formula.PhraseFormulaFactory;
-import com.gpachov.masterthesis.linguistics.sentencemodel.Sentence;
+import com.gpachov.masterthesis.linguistics.sentencemodel.SentenceModel;
 
 public class TurneyClassifier extends Classifier {
 
@@ -48,7 +48,7 @@ public class TurneyClassifier extends Classifier {
 
     @Override
     public ClassificationResult classify(String text) {
-	Sentence tokenizedSentence = new Sentence(text);
+	SentenceModel tokenizedSentence = new SentenceModel(text);
 	List<Phrase> phrases = new ArrayList<Phrase>();
 	PhraseFormulaFactory.getFormulas().forEach(f -> {
 	    phrases.addAll(f.extract(tokenizedSentence));

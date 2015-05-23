@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class RelevantSentenceExtractor implements Extractor {
+public class RelevantSentenceExtractor implements SentenceExtractor {
 
 	@Override
 	public List<String> extractRelevant(String input, String query) {

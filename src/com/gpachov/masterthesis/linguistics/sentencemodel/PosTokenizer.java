@@ -4,9 +4,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class PosTokenizer {
+import edu.stanford.nlp.tagger.maxent.MaxentTagger;
 
+public class PosTokenizer {
+    private static final MaxentTagger tagger =  new MaxentTagger("/home/georgi/EEworkspace/Diplomna/src/resources/models/english-left3words-distsim.tagger");
     public static List<PosToken> tokenize(String raw) {
+	raw = tagger.tagString(raw);//not very raw
 	List<PosToken> result = new ArrayList<PosToken>();
 	Arrays.stream(raw.split("\\s+")).forEach(taggedWord -> {
 	    String[] tokens = taggedWord.split("_");
@@ -24,9 +27,11 @@ public class PosTokenizer {
 			break;
 		    case NOUN:
 			result.add(new Noun(realWord));
-			break;
 		    case ADVERB:
 			result.add(new Adverb(realWord));
+			break;
+		    case PRONOUN:
+			result.add(new Pronoun(realWord));
 			break;
 		    default:
 			result.add(new PosToken(realWord, PosType.OTHER));
@@ -34,7 +39,6 @@ public class PosTokenizer {
 		    }
 		}
 	    }
-
 	});
 	return result;
     }

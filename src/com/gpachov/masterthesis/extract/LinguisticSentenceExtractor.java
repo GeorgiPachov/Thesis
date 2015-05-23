@@ -9,7 +9,7 @@ import com.aliasi.tokenizer.IndoEuropeanTokenizerFactory;
 import com.aliasi.tokenizer.Tokenizer;
 import com.aliasi.tokenizer.TokenizerFactory;
 
-public class LinguisticSentenceExtractor implements Extractor {
+public class LinguisticSentenceExtractor implements SentenceExtractor {
     private static final TokenizerFactory TOKENIZER_FACTORY = IndoEuropeanTokenizerFactory.INSTANCE;
     private static final SentenceModel SENTENCE_MODEL = new MedlineSentenceModel();
 
