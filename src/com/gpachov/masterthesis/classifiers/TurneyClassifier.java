@@ -25,13 +25,14 @@ public class TurneyClassifier extends Classifier {
 	sampleData.entrySet().stream().parallel().forEach(e -> {
 	    DataClass dataClass = e.getKey();
 	    List<String> sentences = e.getValue();
-	    if (dataClass.mean() > 0.3 && dataClass.mean() < 0.61) {
+	    if (dataClass.mean() > 0.31 && dataClass.mean() < 0.61) {
 		return;
 	    }
 	    List<Phrase> phrases = extractPhrases(sentences);
-	    if (dataClass.mean() <= 0.3) {
+	    if (dataClass.equals(DataClass.BAD)){
+		System.out.println("Adding " + phrases + " to bad ");
 		this.badPhrases.addAll(phrases);
-	    } else if (dataClass.mean() > 0.61) {
+	    } else if (dataClass.equals(DataClass.GOOD)) {
 		this.goodPhrases.addAll(phrases);
 	    }
 	});
@@ -58,16 +59,26 @@ public class TurneyClassifier extends Classifier {
 	for (Phrase phrase : phrases) {
 	    long occurenceInBad = badPhrases.stream().filter(p -> p.equals(phrase)).count();
 	    long occurenceInGood = goodPhrases.stream().filter(p -> p.equals(phrase)).count();
+	    if (occurenceInBad > occurenceInGood){
+		System.out.println(phrase + " qualified as bad");
+	    } else {
+	    }
 	    float goodRatio = 0.0f;
 	    if (occurenceInBad + occurenceInBad == 0){
 		goodRatio = 0.5f;
 	    } else {
 		goodRatio = occurenceInGood / (occurenceInBad + occurenceInGood);
 	    }
-	    System.out.println(phrase.toString() + " received " + goodRatio);
+//	    System.out.println(phrase.toString() + " received " + goodRatio);
 	    totalSum += goodRatio;
 	    maxSum += 1;
 	}
+	ClassificationResult result = classify(totalSum, maxSum);
+//	System.out.println("Classified " + text + " as " + result +" because " + );
+	return result;
+    }
+
+    private ClassificationResult classify(float totalSum, float maxSum) {
 	float goodnessRatio = (totalSum / maxSum);
 	if (goodnessRatio < 0.33) {
 	    return ClassificationResult.NEGATIVE;

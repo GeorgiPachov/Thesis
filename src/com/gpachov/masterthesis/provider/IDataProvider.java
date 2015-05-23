@@ -1,4 +1,4 @@
-package com.gpachov.masterthesis;
+package com.gpachov.masterthesis.provider;
 
 import java.util.List;
 import java.util.Map;

@@ -26,7 +26,7 @@ public class WordNetLexiconDecorator implements SentimentLexicon {
 
 	this.allNegativeWords = new HashSet<String>(lexicon.getAllNegative());
 	Set<String> newNegativeWords = new HashSet<String>(lexicon.getAllNegative());
-	int iterations = 3;
+	int iterations = 0;
 	boolean[] change = new boolean[] { iterations > 0};
 	while (change[0]) {
 	    Set<String> positivesToAdd = new HashSet<String>();

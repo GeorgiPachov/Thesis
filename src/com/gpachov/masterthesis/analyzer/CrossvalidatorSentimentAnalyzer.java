@@ -5,13 +5,13 @@ import java.util.Map;
 
 import javax.xml.ws.Holder;
 
-import com.gpachov.masterthesis.IDataProvider;
 import com.gpachov.masterthesis.TrainingData;
 import com.gpachov.masterthesis.TrainingDataBuilder;
 import com.gpachov.masterthesis.classifiers.ClassificationResult;
 import com.gpachov.masterthesis.classifiers.Classifier;
 import com.gpachov.masterthesis.classifiers.ClassifierFactory;
 import com.gpachov.masterthesis.classifiers.DataClass;
+import com.gpachov.masterthesis.provider.IDataProvider;
 import com.gpachov.masterthesis.utils.Pair;
 import com.gpachov.masterthesis.utils.Utils;
 

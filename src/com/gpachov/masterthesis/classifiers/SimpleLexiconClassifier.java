@@ -8,10 +8,10 @@ import com.gpachov.masterthesis.lexicon.AdvancedSentimentLexicon;
 import com.gpachov.masterthesis.lexicon.SentimentLexicon;
 import com.gpachov.masterthesis.lexicon.WordNetLexiconDecorator;
 
-public class SentimentLexiconSimpleClassifier extends Classifier {
-    private SentimentLexicon lexicon = new WordNetLexiconDecorator(new AdvancedSentimentLexicon());
+public class SimpleLexiconClassifier extends Classifier {
+    private SentimentLexicon lexicon = new AdvancedSentimentLexicon();
 
-    public SentimentLexiconSimpleClassifier(Map<DataClass, List<String>> trainingData) {
+    public SimpleLexiconClassifier(Map<DataClass, List<String>> trainingData) {
 	super(trainingData);
     }
 
@@ -21,6 +21,12 @@ public class SentimentLexiconSimpleClassifier extends Classifier {
 	Arrays.stream(text.split("\\s+")).forEach(word -> {
 	    sentimentScore[0] +=lexicon.getScore(word);
 	});
+	ClassificationResult result = classify(sentimentScore);
+//	System.out.println("Classified " + text + " as " + result);
+	return result;
+    }
+
+    private ClassificationResult classify(int[] sentimentScore) {
 	if (sentimentScore[0] > 0)
 	    return ClassificationResult.POSITIVE;
 	else if (sentimentScore[0] < 0)

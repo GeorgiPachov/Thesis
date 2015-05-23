@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import com.gpachov.masterthesis.classifiers.DataClass;
+import com.gpachov.masterthesis.provider.IDataProvider;
 import com.gpachov.masterthesis.utils.Utils;
 
 public class TrainingDataBuilder implements Iterable<TrainingData> {
@@ -22,9 +23,10 @@ public class TrainingDataBuilder implements Iterable<TrainingData> {
 	Map<DataClass, List<String>> classified = provider.getClassified();
 
 //	 equal portions in every data class
-	int class1Size = classified.get(DataClass.BAD).size();
-	int class3Size = classified.get(DataClass.GOOD).size();
-	final int minSentencesPerDataClass = IntStream.of(class1Size, class3Size).min().getAsInt();
+//	int class1Size = classified.get(DataClass.BAD).size();
+//	int class3Size = classified.get(DataClass.GOOD).size();
+//	final int minSentencesPerDataClass = IntStream.of(class1Size, class3Size).min().getAsInt();
+	final int minSentencesPerDataClass = (int) Constants.OPINION_LIMIT_UNCLASSIFIED;
 	classified.keySet().stream().forEach(key -> {
 	    List<String> limited = classified.get(key).stream().limit(minSentencesPerDataClass).collect(Collectors.toList());
 	    classified.replace(key, limited);

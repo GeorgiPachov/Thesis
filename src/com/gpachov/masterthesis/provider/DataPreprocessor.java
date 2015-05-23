@@ -1,4 +1,4 @@
-package com.gpachov.masterthesis;
+package com.gpachov.masterthesis.provider;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,9 +14,11 @@ import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.gpachov.masterthesis.PreprocessingInfo;
 import com.gpachov.masterthesis.classifiers.DataClass;
 import com.gpachov.masterthesis.dictionaries.EnglishDictionary;
 import com.gpachov.masterthesis.dictionaries.SkipWordsDictionary;
+import com.gpachov.masterthesis.filter.SkipEmptyOpinions;
 import com.gpachov.masterthesis.preprocessors.Preprocessor;
 import com.gpachov.masterthesis.progress.ProgressReport;
 import com.gpachov.masterthesis.progress.ProgressReporting;
@@ -38,7 +40,7 @@ public class DataPreprocessor implements IDataProvider, ProgressReporting,
 				new PreprocessingInfo(allWordsCount));
 
 		this.allPreprocessed = iDataProvider.getUnclassified().stream()
-				.map(this::applyPreprocessing).collect(Collectors.toList());
+				.map(this::applyPreprocessing).filter(new SkipEmptyOpinions()).collect(Collectors.toList());
 
 		iDataProvider.getClassified().keySet().stream().forEach(k -> {
 			List<String> preprocessed = iDataProvider.getClassified().get(k).

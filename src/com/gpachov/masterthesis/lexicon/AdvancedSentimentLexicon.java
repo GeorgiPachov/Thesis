@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 
 import javax.management.RuntimeErrorException;
 
-import com.gpachov.masterthesis.classifiers.SentimentLexiconSimpleClassifier;
+import com.gpachov.masterthesis.classifiers.SimpleLexiconClassifier;
 import com.gpachov.masterthesis.dictionaries.SkipWordsDictionary;
 
 public class AdvancedSentimentLexicon implements SentimentLexicon{

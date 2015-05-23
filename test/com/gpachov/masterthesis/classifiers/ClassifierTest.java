@@ -7,10 +7,10 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.gpachov.masterthesis.DataPreprocessor;
-import com.gpachov.masterthesis.DatabaseDataProvider;
 import com.gpachov.masterthesis.analyzer.CrossvalidatorSentimentAnalyzer;
 import com.gpachov.masterthesis.preprocessors.DefaultPreprocessor;
+import com.gpachov.masterthesis.provider.DataPreprocessor;
+import com.gpachov.masterthesis.provider.DatabaseDataProvider;
 
 public abstract class ClassifierTest {
 

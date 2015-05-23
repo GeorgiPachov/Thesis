@@ -5,12 +5,12 @@ public enum DataClass {
 
 		@Override
 		public float upperLimit() {
-			return 0.6f;
+			return 0.4f;
 		}
 
 		@Override
 		public float lowerLimit() {
-			return 0.2f;
+			return 0.0f;
 		}
 	},
 	GOOD {
@@ -31,7 +31,7 @@ public enum DataClass {
 
 	    @Override
 	    public float lowerLimit() {
-		return 0.6f;
+		return 0.4f;
 	    }
 	};
 	public float mean(){

@@ -23,6 +23,8 @@ import com.gpachov.masterthesis.preprocessors.SkipWordsPreprocessor;
 import com.gpachov.masterthesis.preprocessors.TagStrippingPreprocessor;
 import com.gpachov.masterthesis.preprocessors.TrimmingPreprocessor;
 import com.gpachov.masterthesis.preprocessors.WordCompactingPreprocessor;
+import com.gpachov.masterthesis.provider.DataPreprocessor;
+import com.gpachov.masterthesis.provider.DatabaseDataProvider;
 
 public class Main {
 	private static final Logger logger = LoggerFactory.getLogger(Main.class);
