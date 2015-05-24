@@ -1,6 +1,7 @@
 package com.gpachov.masterthesis.classifiers;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -17,11 +18,13 @@ public class MasterAlgorithmClassifier extends Classifier {
     private SentimentLexicon lexicon = new AdvancedSentimentLexicon();
     private static final List<String> formulas = new ArrayList<String>() {
 	{
-	    add("[np]va{1,10}n"); //beds were amazingly good
+	    add("[np]va{1,10}n"); //beds were awlful thing
 	    add("[np]va"); //beds were bad
 	    add("a{1,10}n"); //absolutely great house
-	    add("da"); //amazingly correct
-//	    add("dan"); //amazingly correct
+	    add("a{1,10}d{1,10}"); //amazingly correct <!--staff-->
+	    add("da{1,10}"); //amazingly correct
+	    add("[np]v[np]"); //amazingly correct
+//	    add("da[np]"); //amazingly correct
 	}
     };
     private ExtractionEngine extractionEngine = new ExtractionEngine(formulas);
@@ -38,7 +41,7 @@ public class MasterAlgorithmClassifier extends Classifier {
 	List<String> sentences = splitSentences(text);
 	List<SentenceModel> allSimplifiedSentences = new ArrayList<SentenceModel>();
 	for (String sentence : sentences) {
-	    List<SentenceModel> simplifiedSentence = extractionEngine.extractSimplifiedSentences(sentence);
+	    Collection<SentenceModel> simplifiedSentence = extractionEngine.extractSimplifiedSentences(sentence);
 	    allSimplifiedSentences.addAll(simplifiedSentence);
 	}
 

@@ -1,9 +1,10 @@
 package com.gpachov.masterthesis.linguistics.sentencemodel;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -28,41 +29,34 @@ public class ExtractionEngine {
 	this.formulas = formulas;
     }
     
-    public List<SentenceModel> extractSimplifiedSentences(String sentence){
+    public Collection<SentenceModel> extractSimplifiedSentences(String sentence){
 	SentenceModel model = new SentenceModel(sentence);
 	String sentenceModelAsRegex = createRegexModel(model);
-	
-	List<SentenceModel> results = new ArrayList<SentenceModel>();
+
+	Set<SentenceModel> results = new LinkedHashSet<SentenceModel>();
+	boolean[] tokenUsed = new boolean[4096];
 	for (String formulaRegexModel : formulas){
 	    Pattern formulaPattern = Pattern.compile(formulaRegexModel);
 	    Matcher matcher = formulaPattern.matcher(sentenceModelAsRegex);
-	    
-	    int[] intervalIndex = new int[2048];
 	    while (matcher.find()){
 		int groupBeginIndex = matcher.start();
 		int groupEndIndex = matcher.end();
-		
-		boolean anotherPhraseCollision = false;
-		for (int i = groupBeginIndex; i >= 0; i--){
-		    if (intervalIndex[i] >= groupBeginIndex){
-			anotherPhraseCollision = true;
+
+		boolean phraseAlreadyMarked = false;
+		for (int i = groupBeginIndex; i <= groupEndIndex; i++){
+		    if (tokenUsed[i]){
+			phraseAlreadyMarked = true;
 		    }
 		}
 		
-		for (int i = groupBeginIndex ; i < groupEndIndex; i++){
-		    if (intervalIndex[i] != 0){
-			anotherPhraseCollision = true;
+		if (!phraseAlreadyMarked){
+		    for (int i = groupBeginIndex; i < groupEndIndex; i++){
+			tokenUsed[i] = true;
 		    }
+		    List<PosToken> tokens = model.getTokenOrderedList().subList(groupBeginIndex, groupEndIndex); //is exclusive
+		    String simplifiedSentence = tokens.stream().map(PosToken::getRawWord).collect(Collectors.joining(" "));
+		    results .add(new SentenceModel(simplifiedSentence));
 		}
-		if (anotherPhraseCollision){
-		    continue;
-		}
-		//update indexes
-		intervalIndex[groupBeginIndex] = groupEndIndex;
-		
-		List<PosToken> tokens = model.getTokenOrderedList().subList(groupBeginIndex, groupEndIndex); //is exclusive
-		String simplifiedSentence = tokens.stream().map(PosToken::getRawWord).collect(Collectors.joining(" "));
-		results.add(new SentenceModel(simplifiedSentence));
 	    }
 	}
 	return results;
