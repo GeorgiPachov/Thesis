@@ -21,10 +21,10 @@ public class MasterAlgorithmClassifier extends Classifier {
 	    add("[np]va{1,10}n"); //beds were awlful thing
 	    add("[np]va"); //beds were bad
 	    add("a{1,10}n"); //absolutely great house
-	    add("a{1,10}d{1,10}"); //amazingly correct <!--staff-->
+	    add("adn"); //amazingly correct <!--staff-->
 	    add("da{1,10}"); //amazingly correct
 	    add("[np]v[np]"); //amazingly correct
-//	    add("da[np]"); //amazingly correct
+	    add("da[np]"); //amazingly correct
 	}
     };
     private ExtractionEngine extractionEngine = new ExtractionEngine(formulas);

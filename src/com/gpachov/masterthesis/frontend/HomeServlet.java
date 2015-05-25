@@ -26,6 +26,8 @@ import com.gpachov.masterthesis.extract.SentenceExtractor;
 import com.gpachov.masterthesis.extract.LinguisticSentenceExtractor;
 import com.gpachov.masterthesis.filter.SkipEmptyOpinions;
 import com.gpachov.masterthesis.preprocessors.DefaultPreprocessor;
+import com.gpachov.masterthesis.preprocessors.Preprocessor;
+import com.gpachov.masterthesis.preprocessors.RemovingNonWordsPreprocessor;
 import com.gpachov.masterthesis.provider.DataPreprocessor;
 import com.gpachov.masterthesis.provider.DatabaseDataProvider;
 import com.gpachov.masterthesis.reddit.RedditClient;
@@ -102,6 +104,9 @@ public class HomeServlet extends HttpServlet {
     }
 
     private String doAnalyzeBrand(String input) {
+	Preprocessor preprocessor = new RemovingNonWordsPreprocessor();
+	input = preprocessor.applyPreprocessing(input);
+	
 	StringBuilder result = new StringBuilder();
 	Map<String, ClassificationResult> allAnalyzedSentences = new LinkedHashMap<String, ClassificationResult>();
 	RedditClient redditClient = new RedditClientImpl();
@@ -118,8 +123,8 @@ public class HomeServlet extends HttpServlet {
 		    Entry<String, Pair<DataClass, ClassificationResult>> entry = analyzer.analyze().entrySet().iterator().next();
 		    ClassificationResult res = entry.getValue().getSecond();
 		    String sentences = entry.getKey();
-		    allAnalyzedSentences.put(sentences, res);
 		    if (!res.equals(ClassificationResult.NEUTRAL)){
+			allAnalyzedSentences.put(sentences, res);
 			score += Utils.scoreOf(res);
 			maxScore += 1;
 		    }

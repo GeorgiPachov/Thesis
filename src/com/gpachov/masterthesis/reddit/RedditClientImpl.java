@@ -64,7 +64,7 @@ public class RedditClientImpl implements RedditClient {
 	}
 
 	public static void main(String[] args) {
-		final String userInput = "Samsung";
+		final String userInput = "audi";
 		RedditClient redditClient = new RedditClientImpl();
 		SentenceExtractor extractor = new LinguisticSentenceExtractor();
 		redditClient.getUserOpinions(userInput).stream()

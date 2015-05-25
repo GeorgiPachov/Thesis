@@ -35,7 +35,7 @@ public class LinguisticSentenceExtractor implements SentenceExtractor {
 	    for (int j=sentStartTok; j <= sentEndTok; j++) {
 		sentence.append(tokenArray[j] + whites[j+1]);
 	    }
-	    if (relevant!= null && sentence.toString().contains(relevant)) {
+	    if (relevant!= null && sentence.toString().toLowerCase().contains(relevant.toLowerCase())) {
 		result.add(sentence.toString());
 	    } else if (relevant == null){
 		result.add(sentence.toString());
