@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 
+import org.apache.commons.codec.EncoderException;
+import org.apache.commons.codec.net.URLCodec;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.fluent.Request;
 import org.apache.http.message.BasicNameValuePair;
@@ -21,13 +23,15 @@ public class RedditClientImpl implements RedditClient {
 	private static final String REDIT_SEARCH_API_MF = "http://www.reddit.com/search.json?q={0}&sort=new&limit=100";
 
 	@Override
-	public List<String> getUserOpinions(String query) {
+	public List<String> getSearchResults(String query) {
 		List<String> results = new ArrayList<String>();
 
 		// acquireToken();
 		try {
+		    String safeQuery = new URLCodec("UTF-8").encode(query);
+		    String url = MessageFormat.format(REDIT_SEARCH_API_MF, safeQuery);
 			String jsonResponse = Request
-					.Get(MessageFormat.format(REDIT_SEARCH_API_MF, query))
+					.Get(url)
 					.userAgent("bot 1.0 by /u/gpachov").execute()
 					.returnContent().asString();
 			JSONObject data = new JSONObject(jsonResponse)
@@ -39,7 +43,7 @@ public class RedditClientImpl implements RedditClient {
 				String text = childData.getString("selftext");
 				results.add(text);
 			}
-		} catch (IOException e) {
+		} catch (IOException | EncoderException e) {
 			e.printStackTrace();
 		}
 		return results;
@@ -64,10 +68,10 @@ public class RedditClientImpl implements RedditClient {
 	}
 
 	public static void main(String[] args) {
-		final String userInput = "audi";
+		final String userInput = "Dimitar Berbatov";
 		RedditClient redditClient = new RedditClientImpl();
 		SentenceExtractor extractor = new LinguisticSentenceExtractor();
-		redditClient.getUserOpinions(userInput).stream()
+		redditClient.getSearchResults(userInput).stream()
 				.map(o -> extractor.extractRelevant(o, userInput))
 				.forEach( s -> {
 					s.stream().forEach(se -> {

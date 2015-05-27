@@ -2,6 +2,8 @@ package com.gpachov.masterthesis.frontend;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -15,6 +17,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.gpachov.masterthesis.RemoteApiClient;
 import com.gpachov.masterthesis.TrainingData;
 import com.gpachov.masterthesis.TrainingDataBuilder;
 import com.gpachov.masterthesis.analyzer.DirectSentimentAnalyzer;
@@ -25,9 +28,11 @@ import com.gpachov.masterthesis.classifiers.MasterAlgorithmClassifier;
 import com.gpachov.masterthesis.extract.SentenceExtractor;
 import com.gpachov.masterthesis.extract.LinguisticSentenceExtractor;
 import com.gpachov.masterthesis.filter.SkipEmptyOpinions;
+import com.gpachov.masterthesis.googleplus.GooglePlusClientImpl;
 import com.gpachov.masterthesis.preprocessors.DefaultPreprocessor;
 import com.gpachov.masterthesis.preprocessors.Preprocessor;
 import com.gpachov.masterthesis.preprocessors.RemovingNonWordsPreprocessor;
+import com.gpachov.masterthesis.preprocessors.TagStrippingPreprocessor;
 import com.gpachov.masterthesis.provider.DataPreprocessor;
 import com.gpachov.masterthesis.provider.DatabaseDataProvider;
 import com.gpachov.masterthesis.reddit.RedditClient;
@@ -58,28 +63,17 @@ public class HomeServlet extends HttpServlet {
 	}
     }
 
-    /**
-     * Default constructor.
-     */
     public HomeServlet() {
     }
 
-    /**
-     * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse
-     *      response)
-     */
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
     }
 
-    /**
-     * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse
-     *      response)
-     */
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 	setEncoding(response);
 	final long start = System.currentTimeMillis();
 	String command = request.getParameter("command");
-	String input = request.getParameter("input");
+	String input = (request.getParameter("input"));
 	PrintWriter writer = null;
 	switch (command) {
 	case "test":
@@ -103,19 +97,25 @@ public class HomeServlet extends HttpServlet {
 	response.setCharacterEncoding("UTF-8");
     }
 
-    private String doAnalyzeBrand(String input) {
-	Preprocessor preprocessor = new RemovingNonWordsPreprocessor();
-	input = preprocessor.applyPreprocessing(input);
+    private String doAnalyzeBrand(final String input) {
 	
 	StringBuilder result = new StringBuilder();
 	Map<String, ClassificationResult> allAnalyzedSentences = new LinkedHashMap<String, ClassificationResult>();
-	RedditClient redditClient = new RedditClientImpl();
-	List<String> redditOpinions = redditClient.getUserOpinions(input);
+	
+	List<RemoteApiClient> remoteApiClients = new ArrayList<RemoteApiClient>(){{
+	    add(new RedditClientImpl());
+	    add(new GooglePlusClientImpl());
+	}};
+	
+	List<String> allOpinions = remoteApiClients.stream().map(r -> r.getSearchResults(input)).flatMap(l -> l.stream()).collect(Collectors.toList());
 	SentenceExtractor relevanceExtractor = new LinguisticSentenceExtractor();
 	float score = 0.0f;
 	float maxScore = 0.0f;
-	for (String redditOpinion : redditOpinions) {
-	    List<String> relevantSentences = relevanceExtractor.extractRelevant(redditOpinion, input);
+	TagStrippingPreprocessor tagStrip = new TagStrippingPreprocessor();
+	for (String opinion : allOpinions) {
+	    //remove non-words, links, stuff like that
+	    opinion = tagStrip.applyPreprocessing(opinion);
+	    List<String> relevantSentences = relevanceExtractor.extractRelevant(opinion, input);
 	    for (String relevantSentence : relevantSentences) {
 		relevantSentence = preprocess(relevantSentence);
 		if (new SkipEmptyOpinions().test(relevantSentence)) {
@@ -127,6 +127,8 @@ public class HomeServlet extends HttpServlet {
 			allAnalyzedSentences.put(sentences, res);
 			score += Utils.scoreOf(res);
 			maxScore += 1;
+		    } else if (relevantSentence.contains("noun")){
+			allAnalyzedSentences.put(sentences, res);
 		    }
 		}
 	    }
@@ -158,7 +160,6 @@ public class HomeServlet extends HttpServlet {
 
 	final DirectSentimentAnalyzer analyzer = new DirectSentimentAnalyzer(Arrays.asList(filteredSentence), classifier);
 
-	// XXX relying on analyzer working on 1 sentence
 	List<String> presentableResults = analyzer.analyze().entrySet().stream().map(e -> sentence + "<br/> Positivity score  => " + e.getValue().getSecond())
 		.collect(Collectors.toList());
 	return presentableResults;
