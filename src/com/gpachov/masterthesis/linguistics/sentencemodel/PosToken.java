@@ -32,6 +32,11 @@ public class PosToken {
     protected final String raw;
     protected final PosType posType;
     
+    @Override
+    public String toString() {
+        return raw + " => " + posType;
+    }
+    
     public PosToken(String raw, PosType posType){
 	this.raw = raw;
 	this.posType = posType;

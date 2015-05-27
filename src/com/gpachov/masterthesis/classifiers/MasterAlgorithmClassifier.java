@@ -19,11 +19,13 @@ public class MasterAlgorithmClassifier extends Classifier {
     private static final List<String> formulas = new ArrayList<String>() {
 	{
 	    add("[np]va{1,10}n"); //beds were awlful thing
+	    add("[np]v[ad]{1,10}n"); //beds were awlful thing
 	    add("[np]va"); //beds were bad
-	    add("a{1,10}n"); //absolutely great house
-	    add("adn"); //amazingly correct <!--staff-->
+	    add("tnva"); //beds were bad
+	    add("nva"); //beds were bad
+	    add("[ad]{1,10}n"); //amazingly correct <!--staff-->
 	    add("da{1,10}"); //amazingly correct
-	    add("[np]v[np]"); //amazingly correct
+	    add("[np]v{1,2}[ad]{1,10}[np]"); //amazingly correct
 	    add("da[np]"); //amazingly correct
 	}
     };

@@ -25,6 +25,11 @@ public class SentenceModel implements Iterable<PosToken>{
     public List<PosToken> getTokenOrderedList(){
 	return tokens;
     }
+    
+    @Override
+    public String toString() {
+        return tokens.toString();
+    }
 
     @Override
     public int hashCode() {

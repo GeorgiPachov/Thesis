@@ -18,28 +18,7 @@ public class PosTokenizer {
 
 	    for (PosType type : PosType.values()) {
 		if (type.representation().contains(tag)) {
-		    switch (type) {
-		    case ADJECTIVE:
-			result.add(new Adjective(realWord));
-			break;
-		    case VERB:
-			result.add(new Verb(realWord));
-			break;
-		    case NOUN:
-			result.add(new Noun(realWord));
-		    case ADVERB:
-			result.add(new Adverb(realWord));
-			break;
-		    case PRONOUN:
-			result.add(new Pronoun(realWord));
-			break;
-//		    case DETERMINER:
-//			result.add(new Determiner(realWord));
-//			break;
-//		    default:
-//			result.add(new PosToken(realWord, PosType.OTHER));
-//			break;
-		    }
+		    result.add(new PosToken(realWord, type));
 		}
 	    }
 	});
