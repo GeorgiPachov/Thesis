@@ -15,7 +15,7 @@ public class RelevantSentenceExtractor implements SentenceExtractor {
 				.flatMap(lines -> Arrays.stream(lines))
 				.collect(Collectors.toList());
 		return opinions.stream()
-				.filter(s -> s.toLowerCase().contains(query.toLowerCase()))
+				.filter(s -> query!=null ? s.toLowerCase().contains(query.toLowerCase()) : true)
 				.collect(Collectors.toList());
 	}
 }

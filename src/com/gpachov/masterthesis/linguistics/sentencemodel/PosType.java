@@ -25,7 +25,7 @@ public enum PosType {
     ADVERB {
 	@Override
 	public List<String> representation() {
-	    return Arrays.asList("RB", "RBS", "RBR");
+	    return Arrays.asList("RB", "RBS", "RBR", "WRB"); //whoever
 	}
     }, DETERMINER {
 	@Override
@@ -76,7 +76,7 @@ public enum PosType {
     }, PARTICLE {
 	@Override
 	public List<String> representation() {
-	    return Arrays.asList("PR");
+	    return Arrays.asList("RP");
 	}
     }, FOREIGN_WORD {
 	@Override
@@ -97,12 +97,22 @@ public enum PosType {
     },
     OTHER{
 	public List<String> representation(){
-	    return Arrays.asList("WDT", "WP", "WP$","WRB");
+	    return Arrays.asList("OTHER");
 	}
     }, PRONOUN {
 	@Override
 	public List<String> representation() {
 	    return Arrays.asList("PRP");
+	}
+    }, WH_DETERMINER{
+	@Override
+	public List<String> representation() {
+	    return Arrays.asList("WDT");
+	}
+    }, WH_PRONOUN {
+	@Override
+	public List<String> representation() {
+	    return Arrays.asList("WP", "WP$");
 	}
     };
     public abstract List<String> representation();

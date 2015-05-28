@@ -156,9 +156,8 @@ public class HomeServlet extends HttpServlet {
     }
 
     private List<String> analyze(String sentence) {
-	String filteredSentence = new DefaultPreprocessor().applyPreprocessing(sentence);
 
-	final DirectSentimentAnalyzer analyzer = new DirectSentimentAnalyzer(Arrays.asList(filteredSentence), classifier);
+	final DirectSentimentAnalyzer analyzer = new DirectSentimentAnalyzer(Arrays.asList(sentence), classifier);
 
 	List<String> presentableResults = analyzer.analyze().entrySet().stream().map(e -> sentence + "<br/> Positivity score  => " + e.getValue().getSecond())
 		.collect(Collectors.toList());

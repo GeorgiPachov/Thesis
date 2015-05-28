@@ -33,7 +33,9 @@ public class ExtractionEngine {
 	binding.put('x', PosType.EXISTENTIAL_WORD);
 	binding.put('r', PosType.PREDETERMINER);
 	binding.put('l', PosType.PARTICLE);
-	binding.put('w', PosType.OTHER);
+	binding.put('h', PosType.WH_DETERMINER);
+	binding.put('z', PosType.WH_PRONOUN);
+	binding.put('_', PosType.OTHER);
 
     }
     private List<String> formulas;
@@ -47,6 +49,7 @@ public class ExtractionEngine {
 	String sentenceModelAsRegex = createRegexModel(model);
 
 	Set<SentenceModel> results = new LinkedHashSet<SentenceModel>();
+	boolean[] tokenUsed = new boolean[4096];
 	for (String formulaRegexModel : formulas) {
 	    Pattern formulaPattern = Pattern.compile(formulaRegexModel);
 	    Matcher matcher = formulaPattern.matcher(sentenceModelAsRegex);
@@ -54,22 +57,41 @@ public class ExtractionEngine {
 		int groupBeginIndex = matcher.start();
 		int groupEndIndex = matcher.end();
 
-		List<PosToken> tokens = model.getTokenOrderedList().subList(groupBeginIndex, groupEndIndex); // is
-													     // exclusive
-		String simplifiedSentence = tokens.stream().map(PosToken::getRawWord).collect(Collectors.joining(" "));
-		results.add(new SentenceModel(simplifiedSentence));
+		boolean phraseAlreadyMarked = false;
+		for (int i = groupBeginIndex; i <= groupEndIndex; i++) {
+		    if (tokenUsed[i]) {
+			phraseAlreadyMarked = true;
+		    }
+		}
+
+		if (!phraseAlreadyMarked) {
+		    for (int i = groupBeginIndex; i < groupEndIndex; i++) {
+			tokenUsed[i] = true;
+		    }
+		    List<PosToken> tokens = model.getTokenOrderedList().subList(groupBeginIndex, groupEndIndex); // is
+														 // exclusive
+		    String simplifiedSentence = tokens.stream().map(PosToken::getRawWord).collect(Collectors.joining(" "));
+		    results.add(new SentenceModel(simplifiedSentence));
+		}
+		// List<PosToken> tokens =
+		// model.getTokenOrderedList().subList(groupBeginIndex,
+		// groupEndIndex); // is
+		// // exclusive
+		// String simplifiedSentence =
+		// tokens.stream().map(PosToken::getRawWord).collect(Collectors.joining(" "));
+		// results.add(new SentenceModel(simplifiedSentence));
 	    }
 	}
 	return results;
     }
 
-    private String createRegexModel(SentenceModel model) {
+    //DEBUG
+    public static String createRegexModel(SentenceModel model) {
 	StringBuilder builder = new StringBuilder();
 	for (PosToken token : model) {
 	    char c = binding.inverse().get(token.getPosType());
 	    builder.append(c);
 	}
-	System.out.println(builder.toString());
 	return builder.toString();
     }
 }

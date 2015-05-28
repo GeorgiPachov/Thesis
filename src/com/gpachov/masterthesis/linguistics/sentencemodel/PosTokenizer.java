@@ -14,7 +14,13 @@ public class PosTokenizer {
 	Arrays.stream(raw.split("\\s+")).forEach(taggedWord -> {
 	    String[] tokens = taggedWord.split("_");
 	    String realWord = tokens[0];
-	    String tag = tokens[1];
+	    String tag;
+	    if (tokens.length < 2){
+		System.out.println("warning: coult not tokenize " + taggedWord);
+		tag = "unknown";
+	    } else {
+		tag = tokens[1];
+	    }
 
 	    for (PosType type : PosType.values()) {
 		if (type.representation().contains(tag)) {
