@@ -46,11 +46,6 @@ public class BaseSentimentAnalyzer implements SentimentAnalyzer {
 	return map;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.gpachov.masterthesis.Analyzer#getMatchRate()
-     */
     @Override
     public float getMatchRate() {
 	if (matchRate == 0.0f) {

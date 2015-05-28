@@ -3,16 +3,13 @@ package com.gpachov.masterthesis.classifiers;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import com.gpachov.masterthesis.Constants;
-import com.gpachov.masterthesis.extract.LinguisticSentenceExtractor;
 import com.gpachov.masterthesis.extract.RelevantSentenceExtractor;
-import com.gpachov.masterthesis.extract.SentenceExtractor;
 import com.gpachov.masterthesis.lexicon.AdvancedSentimentLexicon;
 import com.gpachov.masterthesis.lexicon.SentimentLexicon;
 import com.gpachov.masterthesis.linguistics.sentencemodel.ExtractionEngine;
@@ -20,8 +17,10 @@ import com.gpachov.masterthesis.linguistics.sentencemodel.PosToken;
 import com.gpachov.masterthesis.linguistics.sentencemodel.PosType;
 import com.gpachov.masterthesis.linguistics.sentencemodel.SentenceModel;
 
+import edu.smu.tspell.wordnet.SynsetType;
+import edu.smu.tspell.wordnet.WordNetDatabase;
+
 public class MasterAlgorithmClassifier extends Classifier {
-    private SentimentLexicon lexicon = new AdvancedSentimentLexicon();
     private static final List<String> formulas = new ArrayList<String>() {
 	{
 	    add("[np]v{1,2}[ad]{1,10}[np]"); // amazingly correct
@@ -44,12 +43,19 @@ public class MasterAlgorithmClassifier extends Classifier {
 	    add("va{1,10}n"); // amazingly correct
 	    add("d?a{1,10}"); // amazingly correct
 	    add("na(?!n)"); // security nonexistent
+	    add("dv"); // absolutely sucks
 	}
     };
     private ExtractionEngine extractionEngine = new ExtractionEngine(formulas);
+    private SentimentLexicon lexicon = new AdvancedSentimentLexicon();
+    static {
+	System.setProperty("wordnet.database.dir", "/usr/share/wordnet/dict");
+    }
+    private WordNetDatabase wordNetDatabase = WordNetDatabase.getFileInstance();
 
     public MasterAlgorithmClassifier(Map<DataClass, List<String>> trainingData) {
 	super(trainingData);
+
 	// Map<String, String> allResusls = new HashMap<String, String>();
 	// trainingData.entrySet().stream().map(Entry::getValue).flatMap(l ->
 	// l.stream()).forEach(opinion -> {
@@ -82,24 +88,49 @@ public class MasterAlgorithmClassifier extends Classifier {
 	}
 
 	int[] sentimentScore = new int[1];
+	Map<String, Float> wordEvals = new LinkedHashMap<String, Float>();
 	allSimplifiedSentences.stream().forEach(sm -> {
 	    List<PosToken> tokenOrderedList = sm.getTokenOrderedList();
+	    float weight = 0.0f;
 	    for (int i = 0; i < tokenOrderedList.size(); i++) {
 		PosToken posToken = tokenOrderedList.get(i);
+
+		// handle derivatives
 		float score = lexicon.getScore(posToken.getRawWord());
-		if (posToken.getPosType().equals(PosType.ADJECTIVE) || posToken.getPosType().equals(PosType.NOUN)){
-		    //basic check for negation
-		    if (i > 0 && isNegationNaive(tokenOrderedList.get(i-1))){
-			score *=-1;
+		SynsetType synsetType = mapType(posToken);
+		if (score == 0.0f) {
+		    boolean hasDerivatives = synsetType != null;
+		    if (hasDerivatives) {
+			for (String word : wordNetDatabase.getBaseFormCandidates(posToken.getRawWord(), synsetType)) {
+			    score = lexicon.getScore(word);
+			    if (score != 0.0f) {
+				break;
+			    }
+			}
 		    }
+		}
+
+		// handle negation
+		if (posToken.getPosType().equals(PosType.ADJECTIVE) || posToken.getPosType().equals(PosType.NOUN)) {
+		    // basic check for negation
+		    if (i > 0 && isNegationNaive(tokenOrderedList.get(i - 1))) {
+			score *= -1;
+		    }
+
+		    // write score
 		    if (score != 0.0f) {
-        		    if (Constants.DEBUG_CLASSIFIER) {
-        			// System.out.println(" Assigning " + score + " to " +
-        			// posToken.getRawWord());
-        		    }
-        		}
-        		sentimentScore[0] += score;
-        	    }
+			if (Constants.DEBUG_CLASSIFIER) {
+			    wordEvals.put(posToken.getRawWord(), score);
+			    weight += score;
+			}
+		    }
+		    sentimentScore[0] += score;
+		}
+	    }
+	    if (Constants.DEBUG_CLASSIFIER) {
+		System.out.println("Assigned " + weight + " to " + sm);
+		System.out.println(wordEvals);
+		System.out.println("-----------------");
 	    }
 	});
 	ClassificationResult result = classify(sentimentScore);
@@ -109,6 +140,20 @@ public class MasterAlgorithmClassifier extends Classifier {
 	    System.out.println("-------");
 	}
 	return result;
+    }
+
+    private SynsetType mapType(PosToken posToken) {
+	switch (posToken.getPosType()) {
+	case ADJECTIVE:
+	    return SynsetType.ADJECTIVE;
+	case NOUN:
+	    return SynsetType.NOUN;
+	case VERB:
+	    return SynsetType.VERB;
+	case ADVERB:
+	    return SynsetType.ADVERB;
+	}
+	return null;
     }
 
     private boolean isNegationNaive(final PosToken posToken) {

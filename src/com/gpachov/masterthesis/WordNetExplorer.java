@@ -23,22 +23,25 @@ public class WordNetExplorer {
     public static void main(String[] args) {
 	WordNetDatabase wordNetDatabase = WordNetDatabase.getFileInstance();
 	System.setProperty("wordnet.database.dir", "/usr/share/wordnet/dict");
-	SentimentLexicon lexicon = new AdvancedSentimentLexicon();
-	Set<String> newPositives = new HashSet<String>(lexicon.getAllPositive());
-	Set<String> oldNegative = new HashSet<String>(lexicon.getAllNegative());
-	for (int i = 0; i < 10; i++) {
-	    List<String> toAdd = new ArrayList<String>();
-	    newPositives.forEach(positiveWord -> {
-		Synset[] synset = wordNetDatabase.getSynsets(positiveWord);
-		Arrays.stream(synset).forEach(s -> {
-		    for (String wordForm : s.getWordForms()) {
-			toAdd.add(wordForm);
-		    }
-		});
-	    });
-	    System.out.println(newPositives.size());
-	    newPositives.addAll(toAdd);
-	    System.out.println(newPositives.size());
-	}
+	Arrays.stream(wordNetDatabase.getBaseFormCandidates("attractions", SynsetType.NOUN)).forEach(System.out::println);
+	// SentimentLexicon lexicon = new AdvancedSentimentLexicon();
+	// Set<String> newPositives = new
+	// HashSet<String>(lexicon.getAllPositive());
+	// Set<String> oldNegative = new
+	// HashSet<String>(lexicon.getAllNegative());
+	// for (int i = 0; i < 10; i++) {
+	// List<String> toAdd = new ArrayList<String>();
+	// newPositives.forEach(positiveWord -> {
+	// Synset[] synset = wordNetDatabase.getSynsets(positiveWord);
+	// Arrays.stream(synset).forEach(s -> {
+	// for (String wordForm : s.getWordForms()) {
+	// toAdd.add(wordForm);
+	// }
+	// });
+	// });
+	// System.out.println(newPositives.size());
+	// newPositives.addAll(toAdd);
+	// System.out.println(newPositives.size());
+	// }
     }
 }
