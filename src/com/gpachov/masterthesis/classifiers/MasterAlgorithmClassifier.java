@@ -83,10 +83,16 @@ public class MasterAlgorithmClassifier extends Classifier {
 
 	int[] sentimentScore = new int[1];
 	allSimplifiedSentences.stream().forEach(sm -> {
-	    for (PosToken posToken : sm.getTokenOrderedList()) {
+	    List<PosToken> tokenOrderedList = sm.getTokenOrderedList();
+	    for (int i = 0; i < tokenOrderedList.size(); i++) {
+		PosToken posToken = tokenOrderedList.get(i);
 		float score = lexicon.getScore(posToken.getRawWord());
 		if (posToken.getPosType().equals(PosType.ADJECTIVE) || posToken.getPosType().equals(PosType.NOUN)){
-        		if (score != 0.0f) {
+		    //basic check for negation
+		    if (i > 0 && isNegationNaive(tokenOrderedList.get(i-1))){
+			score *=-1;
+		    }
+		    if (score != 0.0f) {
         		    if (Constants.DEBUG_CLASSIFIER) {
         			// System.out.println(" Assigning " + score + " to " +
         			// posToken.getRawWord());
@@ -106,7 +112,7 @@ public class MasterAlgorithmClassifier extends Classifier {
     }
 
     private boolean isNegationNaive(final PosToken posToken) {
-	return Arrays.asList("no", "not", "didnt", "didn't", "did nt", "'nt").stream().filter(s -> posToken.getRawWord().contains(s)).count() % 2 == 1;
+	return Arrays.asList("no", "not", "didnt", "didn't", "did nt", "'nt").stream().filter(s -> posToken.getRawWord().contains(s)).count() > 0;
     }
 
     private ClassificationResult classify(int[] sentimentScore) {
