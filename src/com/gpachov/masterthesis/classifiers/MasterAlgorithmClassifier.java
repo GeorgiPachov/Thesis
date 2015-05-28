@@ -12,13 +12,16 @@ import com.gpachov.masterthesis.Constants;
 import com.gpachov.masterthesis.extract.RelevantSentenceExtractor;
 import com.gpachov.masterthesis.lexicon.AdvancedSentimentLexicon;
 import com.gpachov.masterthesis.lexicon.SentimentLexicon;
+import com.gpachov.masterthesis.lexicon.WordNetLexiconDecorator;
 import com.gpachov.masterthesis.linguistics.sentencemodel.ExtractionEngine;
 import com.gpachov.masterthesis.linguistics.sentencemodel.PosToken;
 import com.gpachov.masterthesis.linguistics.sentencemodel.PosType;
 import com.gpachov.masterthesis.linguistics.sentencemodel.SentenceModel;
 
+import edu.smu.tspell.wordnet.Synset;
 import edu.smu.tspell.wordnet.SynsetType;
 import edu.smu.tspell.wordnet.WordNetDatabase;
+import edu.smu.tspell.wordnet.WordSense;
 
 public class MasterAlgorithmClassifier extends Classifier {
     private static final List<String> formulas = new ArrayList<String>() {
@@ -48,6 +51,7 @@ public class MasterAlgorithmClassifier extends Classifier {
     };
     private ExtractionEngine extractionEngine = new ExtractionEngine(formulas);
     private SentimentLexicon lexicon = new AdvancedSentimentLexicon();
+    private SentimentLexicon wordNetLexicon = new WordNetLexiconDecorator(new AdvancedSentimentLexicon());
     static {
 	System.setProperty("wordnet.database.dir", "/usr/share/wordnet/dict");
     }
@@ -55,27 +59,6 @@ public class MasterAlgorithmClassifier extends Classifier {
 
     public MasterAlgorithmClassifier(Map<DataClass, List<String>> trainingData) {
 	super(trainingData);
-
-	// Map<String, String> allResusls = new HashMap<String, String>();
-	// trainingData.entrySet().stream().map(Entry::getValue).flatMap(l ->
-	// l.stream()).forEach(opinion -> {
-	// SentenceExtractor sentenceSplitter = new
-	// LinguisticSentenceExtractor();
-	// List<String> relevantSentences =
-	// sentenceSplitter.extractRelevant(opinion, null);
-	// for (String relevantSentence : relevantSentences) {
-	// Collection<SentenceModel> fromThisSentence = new
-	// ExtractionEngine(Arrays.asList("n.{0,3}[ad]{0,3}.{0,3}v{1,3}.{0,3}a{0,3}")).extractSimplifiedSentences(relevantSentence);
-	// Map<String, String> collect =
-	// fromThisSentence.stream().collect(Collectors.toMap( s ->
-	// s.getRawSentence(), s -> ExtractionEngine.createRegexModel(s)));
-	// allResusls.putAll(collect);
-	// }
-	// });
-	//
-	// allResusls.entrySet().forEach(e -> {
-	// // System.out.println(e.getKey() + "==>" + e.getValue());
-	// });
     }
 
     @Override
@@ -94,24 +77,47 @@ public class MasterAlgorithmClassifier extends Classifier {
 	    float weight = 0.0f;
 	    for (int i = 0; i < tokenOrderedList.size(); i++) {
 		PosToken posToken = tokenOrderedList.get(i);
-
-		// handle derivatives
-		float score = lexicon.getScore(posToken.getRawWord());
-		SynsetType synsetType = mapType(posToken);
-		if (score == 0.0f) {
-		    boolean hasDerivatives = synsetType != null;
-		    if (hasDerivatives) {
-			for (String word : wordNetDatabase.getBaseFormCandidates(posToken.getRawWord(), synsetType)) {
-			    score = lexicon.getScore(word);
-			    if (score != 0.0f) {
-				break;
+		// handle negation
+		if (posToken.getPosType().equals(PosType.ADJECTIVE) || posToken.getPosType().equals(PosType.NOUN)) {
+		    // handle multiples, singles, etc
+		    float score = lexicon.getScore(posToken.getRawWord());
+		    SynsetType synsetType = mapType(posToken);
+		    if (score == 0.0f) {
+			boolean hasDerivatives = synsetType != null;
+			if (hasDerivatives) {
+			    for (String word : wordNetDatabase.getBaseFormCandidates(posToken.getRawWord(), synsetType)) {
+				score = lexicon.getScore(word);
+				if (score != 0.0f) {
+				    break;
+				}
 			    }
 			}
 		    }
-		}
 
-		// handle negation
-		if (posToken.getPosType().equals(PosType.ADJECTIVE) || posToken.getPosType().equals(PosType.NOUN)) {
+		    // handle derivatives
+		    if (Constants.DERIVATIVE_CORRECTION) {
+			if (score == 0.0f) {
+			    Synset[] synsets = wordNetDatabase.getSynsets(posToken.getRawWord(), mapType(posToken));
+			    for (Synset synset : synsets) {
+				if (score == 0.0f) {
+				    WordSense[] derivationallyRelatedForms = synset.getDerivationallyRelatedForms(posToken.getRawWord());
+				    for (WordSense sense : derivationallyRelatedForms) {
+					score = lexicon.getScore(sense.getWordForm());
+				    }
+				}
+			    }
+			}
+		    }
+		    // check synonim words
+		    if (Constants.SYNONIM_CORRECTION) {
+			if (score == 0.0f) {
+			    // this is safe only for adjectives
+			    if (posToken.getPosType().equals(PosType.ADJECTIVE)) {
+				score = wordNetLexicon.getScore(posToken.getRawWord());
+			    }
+			}
+		    }
+
 		    // basic check for negation
 		    if (i > 0 && isNegationNaive(tokenOrderedList.get(i - 1))) {
 			score *= -1;

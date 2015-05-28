@@ -4,6 +4,8 @@ public class Constants {
     private static final int MULTIPLIER = 1;
     public static final long OPINION_LIMIT_UNCLASSIFIED = MULTIPLIER * 500;
     public static final int OPINION_LIMIT_PER_CLASS = MULTIPLIER * 250;
+    public static final boolean SYNONIM_CORRECTION = false;
+    public static final boolean DERIVATIVE_CORRECTION = false;
     public static boolean DEBUG = true;
     
     public static boolean DEBUG_CLASSIFIER = true;
