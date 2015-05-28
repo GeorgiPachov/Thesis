@@ -157,7 +157,7 @@ public class MasterAlgorithmClassifier extends Classifier {
     }
 
     private boolean isNegationNaive(final PosToken posToken) {
-	return Arrays.asList("no", "not", "didnt", "didn't", "did nt", "'nt").stream().filter(s -> posToken.getRawWord().contains(s)).count() > 0;
+	return Arrays.asList("no", "not", "didnt", "didn't", "did nt", "n't").stream().filter(s -> posToken.getRawWord().contains(s)).count() > 0;
     }
 
     private ClassificationResult classify(int[] sentimentScore) {
