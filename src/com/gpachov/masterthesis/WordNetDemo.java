@@ -4,7 +4,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.gpachov.masterthesis.lexicon.AdvancedSentimentLexicon;
+import com.gpachov.masterthesis.lexicon.AbstractSentimentLexicon;
+import com.gpachov.masterthesis.lexicon.BasicSentimentLexicon;
 
 import edu.smu.tspell.wordnet.Synset;
 import edu.smu.tspell.wordnet.WordNetDatabase;
@@ -19,7 +20,7 @@ public class WordNetDemo {
     public static void main(String[] args) {
 	WordNetDatabase wordNetDatabase = WordNetDatabase.getFileInstance();
 	System.setProperty("wordnet.database.dir", "/usr/share/wordnet/dict");
-	AdvancedSentimentLexicon lexicon = new AdvancedSentimentLexicon();
+	AbstractSentimentLexicon lexicon = new BasicSentimentLexicon();
 	lexicon.getAllPositive().forEach(s -> {
 	    Synset[] synonims = wordNetDatabase.getSynsets(s);
 	    List<String> synonimStrings= Arrays.stream(synonims).flatMap(e -> Arrays.stream(e.getWordForms())).collect(Collectors.toList());

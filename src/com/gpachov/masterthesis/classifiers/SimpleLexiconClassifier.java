@@ -4,12 +4,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import com.gpachov.masterthesis.lexicon.AdvancedSentimentLexicon;
+import com.gpachov.masterthesis.lexicon.BasicSentimentLexicon;
 import com.gpachov.masterthesis.lexicon.SentimentLexicon;
 import com.gpachov.masterthesis.lexicon.WordNetLexiconDecorator;
 
 public class SimpleLexiconClassifier extends Classifier {
-    private SentimentLexicon lexicon = new AdvancedSentimentLexicon();
+    private SentimentLexicon lexicon = new BasicSentimentLexicon();
 
     public SimpleLexiconClassifier(Map<DataClass, List<String>> trainingData) {
 	super(trainingData);

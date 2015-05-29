@@ -15,24 +15,24 @@ import java.util.stream.Collectors;
 
 import javax.management.RuntimeErrorException;
 
+import com.gpachov.masterthesis.Constants;
 import com.gpachov.masterthesis.classifiers.SimpleLexiconClassifier;
 import com.gpachov.masterthesis.dictionaries.SkipWordsDictionary;
 
-public class AdvancedSentimentLexicon implements SentimentLexicon{
-    private static final URL SENTIMENT_LEXICON_FILE = AdvancedSentimentLexicon.class.getClassLoader().getResource("resources/lexicon.txt");
+public class BasicSentimentLexicon extends AbstractSentimentLexicon{
+    private static final URL SENTIMENT_LEXICON_FILE = BasicSentimentLexicon.class.getClassLoader().getResource("resources/lexicon.txt");
     private static final String TYPE_KEY = "type";
     private static final String STRONG_SUBJ = "strongsubj";
     private static final String  POLARITY_KEY = "priorpolarity";
     private static final String POSITIVE = "positive";
     private static final String NEGATIVE = "negative";
     private static final String WORD_KEY = "word1";
-    private Map<String, Float> wordSentimentLexicon = new HashMap<String, Float>();
 
-    public AdvancedSentimentLexicon(){
+    public BasicSentimentLexicon(){
 	try {
 	    Files.readAllLines(Paths.get(SENTIMENT_LEXICON_FILE.toURI())).forEach(l -> {
 		float[] multiplier_subj = new float[]{1.0f};
-		float[] multiplier_polarity = new float[1];
+		float[] multiplier_polarity = new float[]{0.0f};
 		String[] word = new String[]{""};
 		Arrays.stream(l.split("\\s+")).forEach(pair -> {
 		    String[] tokens = pair.split("=");
@@ -40,7 +40,7 @@ public class AdvancedSentimentLexicon implements SentimentLexicon{
 		    String value = tokens[1];
 		    if (TYPE_KEY.equals(key)){
 			if (STRONG_SUBJ.equals(value)){
-			    multiplier_subj[0] = 2.0f;
+			    multiplier_subj[0] = Constants.STRONG_MULTIPLIER;
 			}
 		    } else if (POLARITY_KEY.equals(key)){
 			if (POSITIVE.equals(value)){
@@ -53,31 +53,11 @@ public class AdvancedSentimentLexicon implements SentimentLexicon{
 			word[0] = value;
 		    }
 		});
-		wordSentimentLexicon.put(word[0], multiplier_subj[0] * multiplier_polarity[0]);
+		super.lexicon.put(word[0], multiplier_subj[0] * multiplier_polarity[0]);
 	    });
 	    
 	} catch (IOException | URISyntaxException e) {
 	    throw new RuntimeException(e);
 	}
-    }
-    
-    @Override
-    public float getScore(String word){
-	return wordSentimentLexicon.getOrDefault(word, 0.0f);
-    }
-    
-    @Override
-    public List<String> getAllPositive() {
-	return wordSentimentLexicon.entrySet().stream().filter(e -> e.getValue() > 0).map(e -> e.getKey()).collect(Collectors.toList());
-    }
-    
-    @Override
-    public List<String> getAllNegative(){
-	return wordSentimentLexicon.entrySet().stream().filter(e -> e.getValue() < 0).map(e -> e.getKey()).collect(Collectors.toList());
-    }
-    
-    @Override
-    public List<String> getAllNeutral(){
-   	return wordSentimentLexicon.entrySet().stream().filter(e -> e.getValue() == 0).map(e -> e.getKey()).collect(Collectors.toList());
     }
 }

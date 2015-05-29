@@ -10,7 +10,9 @@ import java.util.stream.Collectors;
 
 import com.gpachov.masterthesis.Constants;
 import com.gpachov.masterthesis.extract.RelevantSentenceExtractor;
-import com.gpachov.masterthesis.lexicon.AdvancedSentimentLexicon;
+import com.gpachov.masterthesis.lexicon.BasicSentimentLexicon;
+import com.gpachov.masterthesis.lexicon.ComposingSentimentLexicon;
+import com.gpachov.masterthesis.lexicon.InquirerSentimentLexicon;
 import com.gpachov.masterthesis.lexicon.SentimentLexicon;
 import com.gpachov.masterthesis.lexicon.WordNetLexiconDecorator;
 import com.gpachov.masterthesis.linguistics.sentencemodel.ExtractionEngine;
@@ -26,32 +28,33 @@ import edu.smu.tspell.wordnet.WordSense;
 public class MasterAlgorithmClassifier extends Classifier {
     private static final List<String> formulas = new ArrayList<String>() {
 	{
-	    add("[np]v{1,2}[ad]{1,10}[np]"); // amazingly correct
-	    add("[np]v[ad]{1,10}n"); // beds were awlful thing
-	    add("[np]va{1,10}n"); // beds were awlful thing
-	    add("[np]va"); // beds were bad
+	    add("[ntp]v{1,2}[ad]{1,2}[np]"); // amazingly correct
+	    add("[ntp]v[ad]{1,2}n"); // beds were awlful thing
+	    add("[ntp]va"); // beds were bad
 
 	    // it was in the middle
 	    // it was a circus
-	    add("n{1,2}vdv");
-	    add("nia{1,10}n");
-	    // cheese with fiery sauce
-
-	    // air conditioner did not work
-	    // conditioner did not work
+	    add("n{1,2}vdv"); //something did not care
+	    add("nia{1,2}n");
 	    add("pvn"); // beds were bad
 	    add("t?nva"); // beds were bad
-	    add("[ad]{1,10}n"); // amazingly correct <!--staff-->
+	    add("[ad]{1,3}n"); // amazingly correct <!--staff-->
 	    add("da?[np]"); // amazingly correct
 	    add("va{1,10}n"); // amazingly correct
 	    add("d?a{1,10}"); // amazingly correct
 	    add("na(?!n)"); // security nonexistent
 	    add("dv"); // absolutely sucks
+	    
+	    //new
+	    add("nvdd"); //spirits dropped even further
+	    add("[ntp]vv"); //we were misled
+	    add("vtn"); //boycott this hotel
+	    add("tvn"); //this was goodness
 	}
     };
     private ExtractionEngine extractionEngine = new ExtractionEngine(formulas);
-    private SentimentLexicon lexicon = new AdvancedSentimentLexicon();
-    private SentimentLexicon wordNetLexicon = new WordNetLexiconDecorator(new AdvancedSentimentLexicon());
+    private SentimentLexicon lexicon = new ComposingSentimentLexicon(Arrays.asList(new BasicSentimentLexicon()));
+    private SentimentLexicon wordNetLexicon = new WordNetLexiconDecorator(lexicon);
     static {
 	System.setProperty("wordnet.database.dir", "/usr/share/wordnet/dict");
     }
@@ -121,6 +124,16 @@ public class MasterAlgorithmClassifier extends Classifier {
 		    // basic check for negation
 		    if (i > 0 && isNegationNaive(tokenOrderedList.get(i - 1))) {
 			score *= -1;
+		    }
+		    
+		    if (Constants.MULTIPLY_CORRECTION){
+			if (posToken.getPosType().equals(PosType.ADJECTIVE)){
+			    //check for multiplication word
+			    List<String> multiplicationWords = Arrays.asList("unbelievably","incredibly","extremely","highly", "very", "really", "much", "truly", "real", "genuinely", "a lot", "lots", "rightfully", "sincerely" );
+			    if (i > 0 && multiplicationWords.contains(tokenOrderedList.get(i-1).getRawWord())){
+				score *=2.0;
+			    }
+			}
 		    }
 
 		    // write score
