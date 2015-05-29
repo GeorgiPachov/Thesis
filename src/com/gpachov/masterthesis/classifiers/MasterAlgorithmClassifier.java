@@ -82,7 +82,7 @@ public class MasterAlgorithmClassifier extends Classifier {
 	    for (int i = 0; i < tokenOrderedList.size(); i++) {
 		PosToken posToken = tokenOrderedList.get(i);
 		// handle negation
-		if (posToken.getPosType().equals(PosType.ADJECTIVE) || posToken.getPosType().equals(PosType.NOUN)) {
+		if (posToken.getPosType().equals(PosType.ADJECTIVE) || posToken.getPosType().equals(PosType.NOUN) || posToken.getPosType().equals(PosType.VERB)) {
 		    // handle multiples, singles, etc
 		    float score = lexicon.getScore(posToken.getRawWord());
 		    SynsetType synsetType = mapType(posToken);

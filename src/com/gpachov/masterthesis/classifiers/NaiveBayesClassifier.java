@@ -6,6 +6,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.gpachov.masterthesis.linguistics.sentencemodel.PosToken;
+import com.gpachov.masterthesis.linguistics.sentencemodel.PosTokenizer;
+import com.gpachov.masterthesis.linguistics.sentencemodel.PosType;
 import com.gpachov.masterthesis.utils.Utils;
 
 public class NaiveBayesClassifier extends Classifier {
@@ -14,7 +17,7 @@ public class NaiveBayesClassifier extends Classifier {
     protected int totalWordCount;
     protected Map<DataClass, Integer> wordCountPerDataClass = new HashMap<DataClass, Integer>();
     private final Object mutex = new Object();
-    
+
     public NaiveBayesClassifier(Map<DataClass, List<String>> trainingData) {
 	super(trainingData);
 	init();
@@ -48,29 +51,32 @@ public class NaiveBayesClassifier extends Classifier {
 	for (int i = 0; i < finalResult.length; i++) {
 	    finalResult[i] = 100_000;
 	}
-	Arrays.stream(text.split("\\s+")).forEach(s -> {
-	    Map<DataClass, Double> probabilities = getScaledLikelyhood(s);
-	    for (int i = 0; i < DataClass.values().length; i++) {
-		DataClass current = DataClass.values()[i];
-		Double probabilityForDataClass = probabilities.get(current);
-		finalResult[i] *= probabilityForDataClass;
+	List<PosToken> posTokens = PosTokenizer.tokenize(text);
+	posTokens.forEach(posToken -> {
+	    if (posToken.getPosType().equals(PosType.ADJECTIVE) || posToken.getPosType().equals(PosType.NOUN) || posToken.getPosType().equals(PosType.ADVERB)) {
+		Map<DataClass, Double> probabilities = getScaledLikelyhood(posToken.getRawWord());
+		for (int i = 0; i < DataClass.values().length; i++) {
+		    DataClass current = DataClass.values()[i];
+		    Double probabilityForDataClass = probabilities.get(current);
+		    finalResult[i] *= probabilityForDataClass;
+		}
 	    }
-	    if (DEBUG){
-		System.out.println("After " + s + " => " + Arrays.toString(finalResult));
+	    if (DEBUG) {
+		System.out.println("After " + posToken + " => " + Arrays.toString(finalResult));
 	    }
 	});
 
 	DataClass result = null;
 	double maxProbability = Arrays.stream(finalResult).max().getAsDouble();
-	
+
 	for (int i = 0; i < finalResult.length; i++) {
 	    if (finalResult[i] == maxProbability) {
 		result = DataClass.values()[i];
 	    }
 	}
 
-	//edge case override - all results are the same - pick neutral
-	if (Arrays.stream(finalResult).distinct().count() == 1){
+	// edge case override - all results are the same - pick neutral
+	if (Arrays.stream(finalResult).distinct().count() == 1) {
 	    result = DataClass.NEUTRAL;
 	}
 
@@ -87,7 +93,7 @@ public class NaiveBayesClassifier extends Classifier {
 	Map<DataClass, Integer> wordOccurences = wordPerDataClassMapping.get(s);
 	if (wordOccurences == null) {
 	    Arrays.stream(DataClass.values()).forEach(d -> result.put(d, 1.0));
-	    return result;	
+	    return result;
 	}
 
 	wordOccurences.entrySet().forEach(entry -> {
@@ -99,8 +105,8 @@ public class NaiveBayesClassifier extends Classifier {
 
 	// 2nd idea -> just generate
 
-	 return result;
-//	return applyScales(s, result);
+	return result;
+	// return applyScales(s, result);
 
     }
 
