@@ -28,9 +28,10 @@ import edu.smu.tspell.wordnet.WordSense;
 public class MasterAlgorithmClassifier extends Classifier {
     private static final List<String> formulas = new ArrayList<String>() {
 	{
-	    add("[ntp]v{1,2}[ad]{1,2}[np]"); // amazingly correct
-	    add("[ntp]v[ad]{1,2}n"); // beds were awlful thing
-	    add("[ntp]va"); // beds were bad
+//	    add("[ntp]{1,3}(!=[nva]){0,3}v{1,2}(!=[nva]){0,3}[ad]{0,2}");
+//	    add("[ntp]v{1,2}[ad]{1,2}[np]"); // amazingly correct
+//	    add("[ntp]v[ad]{1,2}n"); // beds were awlful thing
+	    add("[ntp]v[ad]{1,2}"); // beds were bad
 
 	    // it was in the middle
 	    // it was a circus
