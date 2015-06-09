@@ -11,15 +11,13 @@ import com.gpachov.masterthesis.utils.Pair;
 
 public class DirectSentimentAnalyzer implements SentimentAnalyzer{
 	private List<String> sentences;
-	private Classifier classifier;
 
-	public DirectSentimentAnalyzer(List<String> sentences, Classifier classifier) {
+	public DirectSentimentAnalyzer(List<String> sentences) {
 		this.sentences = sentences;
-		this.classifier = classifier;
 	}
 	
 	@Override
-	public Map<String, Pair<DataClass, ClassificationResult>> analyze() {
+	public Map<String, Pair<DataClass, ClassificationResult>> analyze(Classifier classifier, Map<DataClass, List<String>> testData) {
 		return sentences.stream().collect(Collectors.toMap(k->k, v->new Pair<DataClass, ClassificationResult> (null, classifier.classify(v))));
 	}
 

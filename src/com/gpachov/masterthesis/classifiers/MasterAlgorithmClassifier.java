@@ -9,7 +9,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.gpachov.masterthesis.Constants;
+import com.gpachov.masterthesis.extract.LinguisticSentenceExtractor;
 import com.gpachov.masterthesis.extract.RelevantSentenceExtractor;
+import com.gpachov.masterthesis.extract.SentenceExtractor;
 import com.gpachov.masterthesis.lexicon.BasicSentimentLexicon;
 import com.gpachov.masterthesis.lexicon.ComposingSentimentLexicon;
 import com.gpachov.masterthesis.lexicon.InquirerSentimentLexicon;
@@ -31,26 +33,28 @@ public class MasterAlgorithmClassifier extends Classifier {
 //	    add("[ntp]{1,3}(!=[nva]){0,3}v{1,2}(!=[nva]){0,3}[ad]{0,2}");
 //	    add("[ntp]v{1,2}[ad]{1,2}[np]"); // amazingly correct
 //	    add("[ntp]v[ad]{1,2}n"); // beds were awlful thing
+	    add("[ntp]vdv[ad]{1,2}"); // i do not feel really good
 	    add("[ntp]v[ad]{1,2}"); // beds were bad
 
 	    // it was in the middle
 	    // it was a circus
 	    add("n{1,2}vdv"); //something did not care
 	    add("nia{1,2}n");
-	    add("pvn"); // beds were bad
+	    add("pvd?n"); // beds were bad
 	    add("t?nva"); // beds were bad
 	    add("[ad]{1,3}n"); // amazingly correct <!--staff-->
 	    add("da?[np]"); // amazingly correct
 	    add("va{1,10}n"); // amazingly correct
 	    add("d?a{1,10}"); // amazingly correct
 	    add("na(?!n)"); // security nonexistent
-	    add("dv"); // absolutely sucks
+	    add("v?dv"); // absolutely sucks, really do not like
 	    
 	    //new
 	    add("nvdd"); //spirits dropped even further
 	    add("[ntp]vv"); //we were misled
 	    add("vtn"); //boycott this hotel
 	    add("tvn"); //this was goodness
+//	    add("vn"); //hate volleyball
 	}
     };
     private ExtractionEngine extractionEngine = new ExtractionEngine(formulas);
@@ -123,9 +127,22 @@ public class MasterAlgorithmClassifier extends Classifier {
 		    }
 
 		    // basic check for negation
-		    if (i > 0 && isNegationNaive(tokenOrderedList.get(i - 1))) {
-			score *= -1;
+		    if (Constants.NEGATION_FIX){
+        		    int negationRange = Constants.NEGATION_RANGE;
+        		    if (i > 0){
+        			int j = i-1; 
+        			while (negationRange >= 0 && j >= 0){
+        			    if (isNegationNaive(tokenOrderedList.get(j))){
+        				score *= -1;
+        				break;
+        			    }
+        			    j--; negationRange--;
+        			}
 		    }
+		    }
+//		    if (i > 0 && isNegationNaive(tokenOrderedList.get(i - 1))) {
+//			score *= -1;
+//		    }
 		    
 		    if (Constants.MULTIPLY_CORRECTION){
 			if (posToken.getPosType().equals(PosType.ADJECTIVE)){
@@ -189,7 +206,7 @@ public class MasterAlgorithmClassifier extends Classifier {
     }
 
     private static List<String> splitSentences(String opinion) {
-	RelevantSentenceExtractor sentenceExtractor = new RelevantSentenceExtractor();
+	SentenceExtractor sentenceExtractor = new RelevantSentenceExtractor();
 	List<String> setences = sentenceExtractor.extractRelevant(opinion, null);
 	return setences;
     }

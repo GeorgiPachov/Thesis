@@ -9,6 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.gpachov.masterthesis.linguistics.sentencemodel.PosToken;
 import com.gpachov.masterthesis.linguistics.sentencemodel.PosTokenizer;
 import com.gpachov.masterthesis.linguistics.sentencemodel.PosType;
+import com.gpachov.masterthesis.preprocessors.DefaultPreprocessor;
 import com.gpachov.masterthesis.utils.Utils;
 
 public class NaiveBayesClassifier extends Classifier {
@@ -26,7 +27,8 @@ public class NaiveBayesClassifier extends Classifier {
     protected void init() {
 	super.sampleData.keySet().forEach(key -> {
 	    List<String> sentences = sampleData.get(key);
-	    sentences.parallelStream().flatMap(s -> Arrays.stream(s.split("\\s+"))).forEach(word -> {
+	    DefaultPreprocessor defaultPreprocessor = new DefaultPreprocessor();
+	    sentences.parallelStream().map( s -> defaultPreprocessor.applyPreprocessing(s)).flatMap(s -> Arrays.stream(s.split("\\s+"))).forEach(word -> {
 		HashMap<DataClass, Integer> initializedHashTable = new HashMap<DataClass, Integer>();
 		Arrays.stream(DataClass.values()).forEach(d -> initializedHashTable.put(d, 1));
 		wordPerDataClassMapping.putIfAbsent(word, initializedHashTable);
@@ -51,18 +53,12 @@ public class NaiveBayesClassifier extends Classifier {
 	for (int i = 0; i < finalResult.length; i++) {
 	    finalResult[i] = 100_000;
 	}
-	List<PosToken> posTokens = PosTokenizer.tokenize(text);
-	posTokens.forEach(posToken -> {
-	    if (posToken.getPosType().equals(PosType.ADJECTIVE) || posToken.getPosType().equals(PosType.NOUN) || posToken.getPosType().equals(PosType.ADVERB)) {
-		Map<DataClass, Double> probabilities = getScaledLikelyhood(posToken.getRawWord());
-		for (int i = 0; i < DataClass.values().length; i++) {
-		    DataClass current = DataClass.values()[i];
-		    Double probabilityForDataClass = probabilities.get(current);
-		    finalResult[i] *= probabilityForDataClass;
-		}
-	    }
-	    if (DEBUG) {
-		System.out.println("After " + posToken + " => " + Arrays.toString(finalResult));
+	Arrays.stream(text.split("\\s+")).forEach(word -> {
+	    Map<DataClass, Double> probabilities = getScaledLikelyhood(word);
+	    for (int i = 0; i < DataClass.values().length; i++) {
+		DataClass current = DataClass.values()[i];
+		Double probabilityForDataClass = probabilities.get(current);
+		finalResult[i] *= probabilityForDataClass;
 	    }
 	});
 
@@ -76,11 +72,11 @@ public class NaiveBayesClassifier extends Classifier {
 	}
 
 	// edge case override - all results are the same - pick neutral
+	getProgressReport().onOpinionClassified(text, result);
 	if (Arrays.stream(finalResult).distinct().count() == 1) {
-	    result = DataClass.NEUTRAL;
+	    return ClassificationResult.NEUTRAL;
 	}
 
-	getProgressReport().onOpinionClassified(text, result);
 	return mapToClassifierResult(result);
     }
 
@@ -103,11 +99,7 @@ public class NaiveBayesClassifier extends Classifier {
 	    result.put(entry.getKey(), probability);
 	});
 
-	// 2nd idea -> just generate
-
 	return result;
-	// return applyScales(s, result);
-
     }
 
     private Map<DataClass, Double> applyScales(String s, Map<DataClass, Double> result) {

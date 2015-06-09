@@ -11,7 +11,7 @@ public class RelevantSentenceExtractor implements SentenceExtractor {
 		String sentenceEndings = "!|\\.\\.\\.|\\.|\\?";
 		String[] sentences = input.split(sentenceEndings);
 		List<String> opinions = Arrays.stream(sentences)
-				.map(sentence -> sentence.split("\n{2,}"))
+				.map(sentence -> sentence.split("\n{1,2}"))
 				.flatMap(lines -> Arrays.stream(lines))
 				.collect(Collectors.toList());
 		return opinions.stream()

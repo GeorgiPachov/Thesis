@@ -39,7 +39,7 @@ public class Main {
 
 		final CrossvalidatorSentimentAnalyzer crossvalidator = new CrossvalidatorSentimentAnalyzer(10,
 				classifierFactory, dataPreprocessor);
-		crossvalidator.analyze();
+		crossvalidator.analyze(null, null);
 		float matchRate = crossvalidator.getMatchRate();
 
 		logger.info("It took " + (System.currentTimeMillis() - start) + " milliseconds");

@@ -13,18 +13,11 @@ import com.gpachov.masterthesis.utils.Pair;
 import com.gpachov.masterthesis.utils.Utils;
 
 public class BaseSentimentAnalyzer implements SentimentAnalyzer {
-    private Classifier classifier;
-    private float matchRate;
-    Map<DataClass, List<String>> testData;
 
-    public BaseSentimentAnalyzer(Classifier classifier, Map<DataClass, List<String>> testData) {
-	this.classifier = classifier;
-	this.testData = testData;
-	this.matchRate = 0.0f;
-    }
+    private float matchRate;
 
     @Override
-    public Map<String, Pair<DataClass, ClassificationResult>> analyze() {
+    public Map<String, Pair<DataClass, ClassificationResult>> analyze(Classifier classifier, Map<DataClass, List<String>> testData) {
 	Map<String, Pair<DataClass, ClassificationResult>> map = new LinkedHashMap<String, Pair<DataClass, ClassificationResult>>();
 	final AtomicInteger matchCount = new AtomicInteger(0);
 

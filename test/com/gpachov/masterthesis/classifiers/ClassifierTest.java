@@ -26,7 +26,7 @@ public abstract class ClassifierTest {
     @Test
     public void testClassifier() throws Exception {
 	final CrossvalidatorSentimentAnalyzer crossvalidator = new CrossvalidatorSentimentAnalyzer(10, classifierFactory, dataPreprocessor);
-	crossvalidator.analyze();
+	crossvalidator.analyze(null, null);
 	float matchRate = crossvalidator.getMatchRate();
 
 	System.out.println(matchRate);

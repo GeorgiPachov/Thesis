@@ -25,39 +25,36 @@ import com.google.common.io.Files;
 public class GooglePlusClientImpl implements GooglePlusClient {
 
     private static final File FILE = new File("/home/georgi/EEworkspace/Diplomna/src/key.p12");
-    private static NetHttpTransport httpTransport;
-    private static Plus plus;
     private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
 
+    private static NetHttpTransport httpTransport;
     private static final String SERVICE_ACCOUNT_EMAIL = "218210216811-khj96q72httlv5gek11j86ch8haopoat@developer.gserviceaccount.com";
+    private static GoogleCredential credential;
+    static {
+	try {
+	    httpTransport = GoogleNetHttpTransport.newTrustedTransport();
+	    credential= new GoogleCredential.Builder().setTransport(httpTransport).setJsonFactory(JSON_FACTORY)
+	    	.setServiceAccountId(SERVICE_ACCOUNT_EMAIL).setServiceAccountScopes(Collections.singleton(PlusScopes.PLUS_ME))
+	    	.setServiceAccountPrivateKeyFromP12File(FILE)
+	    	.build();
+	} catch (GeneralSecurityException | IOException e) {
+	    throw new RuntimeException(e);
+	}
+    }
 
     @Override
     public List<String> getSearchResults(String query) {
 	try {
-	    query = new URLCodec("UTF-8").encode(query);
-	    httpTransport = GoogleNetHttpTransport.newTrustedTransport();
-	    // check for valid setup
-	    if (SERVICE_ACCOUNT_EMAIL.startsWith("Enter ")) {
-		System.err.println(SERVICE_ACCOUNT_EMAIL);
-		System.exit(1);
-	    }
-	    String p12Content = Files.readFirstLine(FILE, Charset.defaultCharset());
-	    if (p12Content.startsWith("Please")) {
-		System.err.println(p12Content);
-		System.exit(1);
-	    }
-	    // service account credential (uncomment setServiceAccountUser
-	    // for domain-wide delegation)
-	    GoogleCredential credential = new GoogleCredential.Builder().setTransport(httpTransport).setJsonFactory(JSON_FACTORY)
-		    .setServiceAccountId(SERVICE_ACCOUNT_EMAIL).setServiceAccountScopes(Collections.singleton(PlusScopes.PLUS_ME))
-		    .setServiceAccountPrivateKeyFromP12File(FILE)
-		    // .setServiceAccountUser("user@example.com")
-		    .build();
-	    // set up global Plus instance
-	    plus = new Plus.Builder(httpTransport, JSON_FACTORY, credential).setApplicationName("post-search").build();
-	    // run commands
+	    validateServiceAccountEmail();
+	    validateCertificate();
 
-	    Plus.Activities.Search searchActivities = plus.activities().search("samsung");
+	    query = new URLCodec("UTF-8").encode(query);
+	   
+
+	    // set up global Plus instance
+	    Plus plus = new Plus.Builder(httpTransport, JSON_FACTORY, credential).setApplicationName("post-search").build();
+
+	    Plus.Activities.Search searchActivities = plus.activities().search(query);
 	    searchActivities.setMaxResults(20L);
 
 	    ActivityFeed activityFeed = searchActivities.execute();
@@ -91,13 +88,29 @@ public class GooglePlusClientImpl implements GooglePlusClient {
 
 	    // success!
 	    return results;
-	} catch (GeneralSecurityException | IOException | EncoderException e) {
+	} catch (IOException | EncoderException e) {
 	    throw new RuntimeException(e);
+	}
+    }
+
+    private void validateCertificate() throws IOException {
+	String p12Content = Files.readFirstLine(FILE, Charset.defaultCharset());
+	if (p12Content.startsWith("Please")) {
+	System.err.println(p12Content);
+	System.exit(1);
+	}
+    }
+
+    private void validateServiceAccountEmail() {
+	// check for valid setup
+	if (SERVICE_ACCOUNT_EMAIL.startsWith("Enter ")) {
+	System.err.println(SERVICE_ACCOUNT_EMAIL);
+	System.exit(1);
 	}
     }
     
     public static void main(String[] args) {
-	new GooglePlusClientImpl().getSearchResults("chelsea");
+	System.out.println(new GooglePlusClientImpl().getSearchResults("samsung"));
     }
 
 }

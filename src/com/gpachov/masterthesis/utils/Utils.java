@@ -13,7 +13,7 @@ public class Utils {
     }
 
     public static ClassificationResult mapDataClassToClassifierResult(DataClass result) {
-	if (result.mean() < 0.5) {
+	if (result.equals(DataClass.BAD)) {
 	    return ClassificationResult.NEGATIVE;
 	} 
 	return ClassificationResult.POSITIVE;

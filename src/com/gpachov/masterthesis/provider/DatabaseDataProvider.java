@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import com.gpachov.masterthesis.Constants;
@@ -33,16 +35,22 @@ public class DatabaseDataProvider implements IDataProvider {
     public DatabaseDataProvider() {
 	this.mongo = new DbConnectionFactory().newConnection();
 	Map<String, Double> allStrings = new LinkedHashMap<>();
-//	 readFromGoodreadsCollection(allStrings);
+	// readFromGoodreadsCollection(allStrings);
 	readFromTripAdvisorCollection(allStrings);
 	// readFromAmazon(allStrings);
 
+	final Predicate<? super String> strongDataFilter = s -> {
+	    if (Constants.USE_STRONG_DATA_ONLY) {
+		double evaluation = allStrings.get(s);
+		return evaluation >= 0.7 || evaluation <= 0.35;
+	    }
+	    return true;
+	};
+
 	// add to unclassified
-	if (Constants.DEBUG) {
-	    allStrings.keySet().stream().limit(Constants.OPINION_LIMIT_UNCLASSIFIED).forEach(s -> unclassified.add(s));
-	} else {
-	    allStrings.keySet().stream().forEach(s -> unclassified.add(s));
-	}
+	long sizeFilter = Constants.DEBUG ? Constants.OPINION_LIMIT_UNCLASSIFIED : Long.MAX_VALUE;
+	allStrings.keySet().stream().filter(strongDataFilter).limit(sizeFilter).forEach(s -> unclassified.add(s));
+
 	// classify
 
 	allStrings.entrySet().stream().forEach(e -> {
@@ -50,8 +58,17 @@ public class DatabaseDataProvider implements IDataProvider {
 	    DataClass dataClass = Utils.classify(evaluation);
 	    classified.putIfAbsent(dataClass, new ArrayList<String>());
 
-	    String opinion = e.getKey();
-	    classified.get(dataClass).add(opinion);
+	    if (classified.get(dataClass).size() <= Constants.OPINION_LIMIT_PER_CLASS) {
+		if (Constants.USE_STRONG_DATA_ONLY) {
+		    if (evaluation >= 0.7 || evaluation <= 0.35) {
+			String opinion = e.getKey();
+			classified.get(dataClass).add(opinion);
+		    }
+		} else {
+		    String opinion = e.getKey();
+		    classified.get(dataClass).add(opinion);
+		}
+	    }
 	});
     }
 

@@ -23,20 +23,7 @@ public enum DataClass {
 		public float lowerLimit() {
 			return 1.0f;
 		}
-	}, NEUTRAL {
-	    @Override
-	    public float upperLimit() {
-		return 0.6f;
-	    }
-
-	    @Override
-	    public float lowerLimit() {
-		return 0.4f;
-	    }
 	};
-	public float mean(){
-		return (upperLimit() + lowerLimit()) / 2;
-	}
 	public abstract float upperLimit();
 	public abstract float lowerLimit();
 	

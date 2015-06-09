@@ -17,7 +17,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.gpachov.masterthesis.RemoteApiClient;
+import com.gpachov.masterthesis.RemoteSearchApiClient;
 import com.gpachov.masterthesis.TrainingData;
 import com.gpachov.masterthesis.TrainingDataBuilder;
 import com.gpachov.masterthesis.analyzer.DirectSentimentAnalyzer;
@@ -102,7 +102,7 @@ public class HomeServlet extends HttpServlet {
 	StringBuilder result = new StringBuilder();
 	Map<String, ClassificationResult> allAnalyzedSentences = new LinkedHashMap<String, ClassificationResult>();
 	
-	List<RemoteApiClient> remoteApiClients = new ArrayList<RemoteApiClient>(){{
+	List<RemoteSearchApiClient> remoteApiClients = new ArrayList<RemoteSearchApiClient>(){{
 	    add(new RedditClientImpl());
 	    add(new GooglePlusClientImpl());
 	}};
@@ -119,8 +119,8 @@ public class HomeServlet extends HttpServlet {
 	    for (String relevantSentence : relevantSentences) {
 		relevantSentence = preprocess(relevantSentence);
 		if (new SkipEmptyOpinions().test(relevantSentence)) {
-		    final DirectSentimentAnalyzer analyzer = new DirectSentimentAnalyzer(Arrays.asList(relevantSentence), classifier);
-		    Entry<String, Pair<DataClass, ClassificationResult>> entry = analyzer.analyze().entrySet().iterator().next();
+		    final DirectSentimentAnalyzer analyzer = new DirectSentimentAnalyzer(Arrays.asList(relevantSentence));
+		    Entry<String, Pair<DataClass, ClassificationResult>> entry = analyzer.analyze(classifier, null).entrySet().iterator().next();
 		    ClassificationResult res = entry.getValue().getSecond();
 		    String sentences = entry.getKey();
 		    if (!res.equals(ClassificationResult.NEUTRAL)){
@@ -156,10 +156,8 @@ public class HomeServlet extends HttpServlet {
     }
 
     private List<String> analyze(String sentence) {
-
-	final DirectSentimentAnalyzer analyzer = new DirectSentimentAnalyzer(Arrays.asList(sentence), classifier);
-
-	List<String> presentableResults = analyzer.analyze().entrySet().stream().map(e -> sentence + "<br/> Positivity score  => " + e.getValue().getSecond())
+	final DirectSentimentAnalyzer analyzer = new DirectSentimentAnalyzer(Arrays.asList(sentence));
+	List<String> presentableResults = analyzer.analyze(classifier, null).entrySet().stream().map(e -> sentence + "<br/> Positivity score  => " + e.getValue().getSecond())
 		.collect(Collectors.toList());
 	return presentableResults;
     }

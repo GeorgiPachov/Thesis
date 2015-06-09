@@ -1,10 +1,10 @@
 package com.gpachov.masterthesis.progress;
 
 public interface ProgressReporting {
-	ProgressReport PROGRESS_REPORT = createProgressReport();
+	ProgressReport DEFAULT_PROGRESS_REPORT = createProgressReport();
 
 	default ProgressReport getProgressReport(){
-		return PROGRESS_REPORT;
+		return DEFAULT_PROGRESS_REPORT;
 	}
 
 	static ProgressReport createProgressReport(){
