@@ -10,6 +10,11 @@ import com.gpachov.masterthesis.linguistics.sentencemodel.PosToken;
 import com.gpachov.masterthesis.linguistics.sentencemodel.PosTokenizer;
 import com.gpachov.masterthesis.linguistics.sentencemodel.PosType;
 import com.gpachov.masterthesis.preprocessors.DefaultPreprocessor;
+<<<<<<< Updated upstream
+=======
+import com.gpachov.masterthesis.preprocessors.Preprocessor;
+import com.gpachov.masterthesis.preprocessors.SkipWordsPreprocessor;
+>>>>>>> Stashed changes
 import com.gpachov.masterthesis.utils.Utils;
 
 public class NaiveBayesClassifier extends Classifier {
@@ -17,7 +22,7 @@ public class NaiveBayesClassifier extends Classifier {
     protected Map<String, Map<DataClass, Integer>> wordPerDataClassMapping = new ConcurrentHashMap<String, Map<DataClass, Integer>>();
     protected int totalWordCount;
     protected Map<DataClass, Integer> wordCountPerDataClass = new HashMap<DataClass, Integer>();
-    private final Object mutex = new Object();
+    private Preprocessor preprocessor  = new SkipWordsPreprocessor();
 
     public NaiveBayesClassifier(Map<DataClass, List<String>> trainingData) {
 	super(trainingData);
@@ -27,8 +32,8 @@ public class NaiveBayesClassifier extends Classifier {
     protected void init() {
 	super.sampleData.keySet().forEach(key -> {
 	    List<String> sentences = sampleData.get(key);
-	    DefaultPreprocessor defaultPreprocessor = new DefaultPreprocessor();
-	    sentences.parallelStream().map( s -> defaultPreprocessor.applyPreprocessing(s)).flatMap(s -> Arrays.stream(s.split("\\s+"))).forEach(word -> {
+	    DefaultPreprocessor preprocessor = new DefaultPreprocessor();
+	    sentences.parallelStream().map(s -> preprocessor.applyPreprocessing(s)).flatMap(s -> Arrays.stream(s.split("\\s+"))).forEach(word -> {
 		HashMap<DataClass, Integer> initializedHashTable = new HashMap<DataClass, Integer>();
 		Arrays.stream(DataClass.values()).forEach(d -> initializedHashTable.put(d, 1));
 		wordPerDataClassMapping.putIfAbsent(word, initializedHashTable);
@@ -49,16 +54,21 @@ public class NaiveBayesClassifier extends Classifier {
 
     @Override
     public ClassificationResult classify(String text) {
+	text = preprocessor.applyPreprocessing(text);
 	double[] finalResult = new double[DataClass.values().length];
 	for (int i = 0; i < finalResult.length; i++) {
 	    finalResult[i] = 100_000;
 	}
-	Arrays.stream(text.split("\\s+")).forEach(word -> {
-	    Map<DataClass, Double> probabilities = getScaledLikelyhood(word);
-	    for (int i = 0; i < DataClass.values().length; i++) {
-		DataClass current = DataClass.values()[i];
-		Double probabilityForDataClass = probabilities.get(current);
-		finalResult[i] *= probabilityForDataClass;
+	List<PosToken> posTokens = PosTokenizer.tokenize(text);
+	posTokens.forEach(posToken -> {
+		Map<DataClass, Double> probabilities = getScaledLikelyhood(posToken.getRawWord());
+		for (int i = 0; i < DataClass.values().length; i++) {
+		    DataClass current = DataClass.values()[i];
+		    Double probabilityForDataClass = probabilities.get(current);
+		    finalResult[i] *= probabilityForDataClass;
+		}
+	    if (DEBUG) {
+		System.out.println("After " + posToken + " => " + Arrays.toString(finalResult));
 	    }
 	});
 

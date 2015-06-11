@@ -13,6 +13,6 @@ public class Constants {
     public static boolean USE_STRONG_DATA_ONLY = false;
     
     public static boolean DEBUG = true;
-    public static boolean DEBUG_CLASSIFIER = false;
+    public static boolean DEBUG_CLASSIFIER = true;
     public static boolean DEBUG_ANALYZER = false;
 }

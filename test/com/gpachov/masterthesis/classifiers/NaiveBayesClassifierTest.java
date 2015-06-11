@@ -28,7 +28,6 @@ public class NaiveBayesClassifierTest extends ClassifierTest {
 	    }
 	}
 
-	@Test
 	public void testPositiveWords() throws Exception {
 	    assertFalse(classifier.classify("good").equals(ClassificationResult.NEGATIVE));
 	    assertTrue(classifier.classify("great").equals(ClassificationResult.POSITIVE));
