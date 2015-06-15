@@ -4,20 +4,14 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
+import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import javax.management.RuntimeErrorException;
 
 import com.gpachov.masterthesis.Constants;
-import com.gpachov.masterthesis.classifiers.SimpleLexiconClassifier;
-import com.gpachov.masterthesis.dictionaries.SkipWordsDictionary;
+import com.gpachov.masterthesis.linguistics.sentencemodel.PosType;
 
 public class BasicSentimentLexicon extends AbstractSentimentLexicon{
     private static final URL SENTIMENT_LEXICON_FILE = BasicSentimentLexicon.class.getClassLoader().getResource("resources/lexicon.txt");
@@ -27,7 +21,8 @@ public class BasicSentimentLexicon extends AbstractSentimentLexicon{
     private static final String POSITIVE = "positive";
     private static final String NEGATIVE = "negative";
     private static final String WORD_KEY = "word1";
-
+    private static final Object POS_KEY = "pos1";
+    
     public BasicSentimentLexicon(){
 	try {
 	    Files.readAllLines(Paths.get(SENTIMENT_LEXICON_FILE.toURI())).forEach(l -> {
@@ -59,5 +54,10 @@ public class BasicSentimentLexicon extends AbstractSentimentLexicon{
 	} catch (IOException | URISyntaxException e) {
 	    throw new RuntimeException(e);
 	}
+    }
+
+    @Override
+    public float getScore(String word, PosType posType) {
+        return super.getScore(word, posType);
     }
 }

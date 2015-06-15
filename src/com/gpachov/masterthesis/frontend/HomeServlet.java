@@ -24,7 +24,7 @@ import com.gpachov.masterthesis.analyzer.DirectSentimentAnalyzer;
 import com.gpachov.masterthesis.classifiers.ClassificationResult;
 import com.gpachov.masterthesis.classifiers.Classifier;
 import com.gpachov.masterthesis.classifiers.DataClass;
-import com.gpachov.masterthesis.classifiers.MasterAlgorithmClassifier;
+import com.gpachov.masterthesis.classifiers.SemanticClassifier;
 import com.gpachov.masterthesis.extract.SentenceExtractor;
 import com.gpachov.masterthesis.extract.LinguisticSentenceExtractor;
 import com.gpachov.masterthesis.filter.SkipEmptyOpinions;
@@ -39,6 +39,8 @@ import com.gpachov.masterthesis.reddit.RedditClient;
 import com.gpachov.masterthesis.reddit.RedditClientImpl;
 import com.gpachov.masterthesis.utils.Pair;
 import com.gpachov.masterthesis.utils.Utils;
+
+import edu.stanford.nlp.io.EncodingPrintWriter.out;
 
 /**
  * Servlet implementation class HomeServlet
@@ -59,7 +61,7 @@ public class HomeServlet extends HttpServlet {
 
 	    // i was in a hurry
 	    TrainingData trainingData = trainingDataBuilder.iterator().next();
-	    this.classifier = new MasterAlgorithmClassifier(trainingData.getAll());
+	    this.classifier = new SemanticClassifier(trainingData.getAll());
 	}
     }
 
@@ -75,20 +77,23 @@ public class HomeServlet extends HttpServlet {
 	String command = request.getParameter("command");
 	String input = (request.getParameter("input"));
 	PrintWriter writer = null;
+	String output = "";
 	switch (command) {
 	case "test":
-	    String output = test(input);
-	    writer = response.getWriter();
-	    writer.println(output);
+	    output = test(input);
+//	    writer = response.getWriter();
+//	    writer.println(output);
 	    break;
 	case "analyze":
-	    String analyzeOutput = doAnalyzeBrand(input);
-	    writer = response.getWriter();
-	    writer.println(analyzeOutput);
+	    output = doAnalyzeBrand(input);
+//	    writer = response.getWriter();
+//	    writer.println(analyzeOutput);
 	    break;
 	}
 	final long end = System.currentTimeMillis();
-	writer.println("Analysis completed in " + (end - start) + " milliseconds");
+	output += ("\nAnalysis completed in " + (end - start) + " milliseconds");
+	request.setAttribute("result", output);
+	getServletContext().getRequestDispatcher("/index.jsp").forward(request, response);
 
     }
 

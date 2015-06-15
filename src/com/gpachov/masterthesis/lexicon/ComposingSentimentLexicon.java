@@ -5,6 +5,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.gpachov.masterthesis.linguistics.sentencemodel.PosType;
+
 public class ComposingSentimentLexicon implements SentimentLexicon {
     private List<SentimentLexicon> lexicons = new ArrayList<>();
 
@@ -28,11 +30,11 @@ public class ComposingSentimentLexicon implements SentimentLexicon {
     }
 
     @Override
-    public float getScore(String word) {
+    public float getScore(String word, PosType posType) {
 //	double[] result = new double[1];
 	for (SentimentLexicon l : lexicons){
-	    if (l.getScore(word)!=0.0f){
-		return l.getScore(word);
+	    if (l.getScore(word, posType)!=0.0f){
+		return l.getScore(word, posType);
 	    }
 	}
 //	lexicons.stream().mapToDouble(l -> l.getScore(word)).filter(v -> v!=0.0f).average().ifPresent( d-> {

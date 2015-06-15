@@ -9,15 +9,14 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.gpachov.masterthesis.Constants;
-import com.gpachov.masterthesis.extract.LinguisticSentenceExtractor;
 import com.gpachov.masterthesis.extract.RelevantSentenceExtractor;
 import com.gpachov.masterthesis.extract.SentenceExtractor;
 import com.gpachov.masterthesis.lexicon.BasicSentimentLexicon;
 import com.gpachov.masterthesis.lexicon.ComposingSentimentLexicon;
-import com.gpachov.masterthesis.lexicon.InquirerSentimentLexicon;
 import com.gpachov.masterthesis.lexicon.SentimentLexicon;
 import com.gpachov.masterthesis.lexicon.WordNetLexiconDecorator;
 import com.gpachov.masterthesis.linguistics.sentencemodel.ExtractionEngine;
+import com.gpachov.masterthesis.linguistics.sentencemodel.ExtractionEngineImpl;
 import com.gpachov.masterthesis.linguistics.sentencemodel.PosToken;
 import com.gpachov.masterthesis.linguistics.sentencemodel.PosType;
 import com.gpachov.masterthesis.linguistics.sentencemodel.SentenceModel;
@@ -27,7 +26,7 @@ import edu.smu.tspell.wordnet.SynsetType;
 import edu.smu.tspell.wordnet.WordNetDatabase;
 import edu.smu.tspell.wordnet.WordSense;
 
-public class MasterAlgorithmClassifier extends Classifier {
+public class SemanticClassifier extends Classifier {
     private static final List<String> formulas = new ArrayList<String>() {
 	{
 //	    add("[ntp]{1,3}(!=[nva]){0,3}v{1,2}(!=[nva]){0,3}[ad]{0,2}");
@@ -50,14 +49,17 @@ public class MasterAlgorithmClassifier extends Classifier {
 	    add("v?dv"); // absolutely sucks, really do not like
 	    
 	    //new
+	    add("a{1,2}n");
 	    add("nvdd"); //spirits dropped even further
 	    add("[ntp]vv"); //we were misled
 	    add("vtn"); //boycott this hotel
 	    add("tvn"); //this was goodness
+	    add("tva"); //this was goodness
+	    add("a{1,2}");
 //	    add("vn"); //hate volleyball
 	}
     };
-    private ExtractionEngine extractionEngine = new ExtractionEngine(formulas);
+    private ExtractionEngine extractionEngine = new ExtractionEngineImpl(formulas);
     private SentimentLexicon lexicon = new ComposingSentimentLexicon(Arrays.asList(new BasicSentimentLexicon()));
     private SentimentLexicon wordNetLexicon = new WordNetLexiconDecorator(lexicon);
     static {
@@ -65,7 +67,7 @@ public class MasterAlgorithmClassifier extends Classifier {
     }
     private WordNetDatabase wordNetDatabase = WordNetDatabase.getFileInstance();
 
-    public MasterAlgorithmClassifier(Map<DataClass, List<String>> trainingData) {
+    public SemanticClassifier(Map<DataClass, List<String>> trainingData) {
 	super(trainingData);
     }
 
@@ -88,13 +90,13 @@ public class MasterAlgorithmClassifier extends Classifier {
 		// handle negation
 		if (posToken.getPosType().equals(PosType.ADJECTIVE) || posToken.getPosType().equals(PosType.NOUN) || posToken.getPosType().equals(PosType.VERB)) {
 		    // handle multiples, singles, etc
-		    float score = lexicon.getScore(posToken.getRawWord());
+		    float score = lexicon.getScore(posToken.getRawWord(), posToken.getPosType());
 		    SynsetType synsetType = mapType(posToken);
 		    if (score == 0.0f) {
 			boolean hasDerivatives = synsetType != null;
 			if (hasDerivatives) {
 			    for (String word : wordNetDatabase.getBaseFormCandidates(posToken.getRawWord(), synsetType)) {
-				score = lexicon.getScore(word);
+				score = lexicon.getScore(word, posToken.getPosType());
 				if (score != 0.0f) {
 				    break;
 				}
@@ -110,7 +112,7 @@ public class MasterAlgorithmClassifier extends Classifier {
 				if (score == 0.0f) {
 				    WordSense[] derivationallyRelatedForms = synset.getDerivationallyRelatedForms(posToken.getRawWord());
 				    for (WordSense sense : derivationallyRelatedForms) {
-					score = lexicon.getScore(sense.getWordForm());
+					score = lexicon.getScore(sense.getWordForm(), posToken.getPosType());
 				    }
 				}
 			    }
@@ -121,13 +123,21 @@ public class MasterAlgorithmClassifier extends Classifier {
 			if (score == 0.0f) {
 			    // this is safe only for adjectives
 			    if (posToken.getPosType().equals(PosType.ADJECTIVE)) {
-				score = wordNetLexicon.getScore(posToken.getRawWord());
+				score = wordNetLexicon.getScore(posToken.getRawWord(), posToken.getPosType());
+			    }
+			}
+		    }
+		    
+		    if (Constants.PLURAL_CORRECTION){
+			if (score == 0.0f){
+			    if (posToken.getPosType().equals(PosType.NOUN) && posToken.getRawWord().endsWith("s")){
+				score = wordNetLexicon.getScore(posToken.getRawWord().substring(0, posToken.getRawWord().length()-1), posToken.getPosType());
 			    }
 			}
 		    }
 
 		    // basic check for negation
-		    if (Constants.NEGATION_FIX){
+		    if (Constants.NEGATION_CORRECTION){
         		    int negationRange = Constants.NEGATION_RANGE;
         		    if (i > 0){
         			int j = i-1; 
@@ -138,11 +148,8 @@ public class MasterAlgorithmClassifier extends Classifier {
         			    }
         			    j--; negationRange--;
         			}
+        		    }
 		    }
-		    }
-//		    if (i > 0 && isNegationNaive(tokenOrderedList.get(i - 1))) {
-//			score *= -1;
-//		    }
 		    
 		    if (Constants.MULTIPLY_CORRECTION){
 			if (posToken.getPosType().equals(PosType.ADJECTIVE)){

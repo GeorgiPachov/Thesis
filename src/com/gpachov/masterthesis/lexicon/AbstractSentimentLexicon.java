@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.gpachov.masterthesis.linguistics.sentencemodel.PosType;
+
 public abstract class AbstractSentimentLexicon implements SentimentLexicon{
 
     protected Map<String, Float> lexicon = new HashMap<String, Float>();
@@ -26,7 +28,7 @@ public abstract class AbstractSentimentLexicon implements SentimentLexicon{
     }
 
     @Override
-    public float getScore(String word) {
+    public float getScore(String word, PosType posType) {
         return lexicon.getOrDefault(word, 0.0f);
     }
 

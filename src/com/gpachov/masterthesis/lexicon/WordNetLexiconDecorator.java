@@ -3,14 +3,14 @@ package com.gpachov.masterthesis.lexicon;
 import java.util.Collection;
 import java.util.HashSet;
 
+import com.gpachov.masterthesis.linguistics.sentencemodel.PosType;
+
 import edu.smu.tspell.wordnet.Synset;
 import edu.smu.tspell.wordnet.SynsetType;
 import edu.smu.tspell.wordnet.WordNetDatabase;
 
 public class WordNetLexiconDecorator implements SentimentLexicon {
 
-    private HashSet<String> allPositiveWords;
-    private HashSet<String> allNegativeWords;
     private SentimentLexicon lexicon;
     private WordNetDatabase wordNetDatabase;
 
@@ -19,8 +19,6 @@ public class WordNetLexiconDecorator implements SentimentLexicon {
 
 	wordNetDatabase = WordNetDatabase.getFileInstance();
 	System.setProperty("wordnet.database.dir", "/usr/share/wordnet/dict");
-	this.allPositiveWords = new HashSet<String>(lexicon.getAllPositive());
-	this.allNegativeWords = new HashSet<String>(lexicon.getAllNegative());
     }
 
     @Override
@@ -39,8 +37,8 @@ public class WordNetLexiconDecorator implements SentimentLexicon {
     }
     
     @Override
-    public float getScore(String word) {
-	float defaultScore = lexicon.getScore(word);
+    public float getScore(String word, PosType posType) {
+	float defaultScore = lexicon.getScore(word, posType);
 	if (defaultScore!= 0.0f){
 	    
 	    return defaultScore;
@@ -50,9 +48,9 @@ public class WordNetLexiconDecorator implements SentimentLexicon {
 	    Synset[] synsets = wordNetDatabase.getSynsets(word, SynsetType.ADJECTIVE);
 	    for (Synset synset : synsets){
 		for (String wordForm : synset.getWordForms()){
-		    System.out.println(word + " => " + wordForm );
-		    float score = lexicon.getScore(wordForm);
-		    if (score!=0.0f){
+		    float score = lexicon.getScore(wordForm, posType);
+		    if (score!=0.0f && !wordForm.trim().equalsIgnoreCase(word.trim())){
+			System.out.println(word + " => " + wordForm );
 			return score;
 		    }
 		}

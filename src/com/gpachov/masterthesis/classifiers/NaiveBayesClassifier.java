@@ -8,13 +8,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.gpachov.masterthesis.linguistics.sentencemodel.PosToken;
 import com.gpachov.masterthesis.linguistics.sentencemodel.PosTokenizer;
-import com.gpachov.masterthesis.linguistics.sentencemodel.PosType;
 import com.gpachov.masterthesis.preprocessors.DefaultPreprocessor;
-<<<<<<< Updated upstream
-=======
 import com.gpachov.masterthesis.preprocessors.Preprocessor;
 import com.gpachov.masterthesis.preprocessors.SkipWordsPreprocessor;
->>>>>>> Stashed changes
 import com.gpachov.masterthesis.utils.Utils;
 
 public class NaiveBayesClassifier extends Classifier {
