@@ -20,6 +20,7 @@ import com.gpachov.masterthesis.linguistics.sentencemodel.ExtractionEngineImpl;
 import com.gpachov.masterthesis.linguistics.sentencemodel.PosToken;
 import com.gpachov.masterthesis.linguistics.sentencemodel.PosType;
 import com.gpachov.masterthesis.linguistics.sentencemodel.SentenceModel;
+import com.gpachov.masterthesis.utils.Utils;
 
 import edu.smu.tspell.wordnet.Synset;
 import edu.smu.tspell.wordnet.SynsetType;
@@ -29,9 +30,11 @@ import edu.smu.tspell.wordnet.WordSense;
 public class SemanticClassifier extends Classifier {
     private static final List<String> formulas = new ArrayList<String>() {
 	{
-//	    add("[ntp]{1,3}(!=[nva]){0,3}v{1,2}(!=[nva]){0,3}[ad]{0,2}");
-//	    add("[ntp]v{1,2}[ad]{1,2}[np]"); // amazingly correct
 //	    add("[ntp]v[ad]{1,2}n"); // beds were awlful thing
+//	    add("[ntp].*?v.*?[ad]{1,2}"); // I do not enjoy volleyball
+//	    add("[ntp].*?v.*?n"); // I do not enjoy volleyball
+	    add("[ntp]vdvn"); // I do not enjoy volleyball
+//	    add("[ntp]vdvv"); // I do not enjoy swimming
 	    add("[ntp]vdv[ad]{1,2}"); // i do not feel really good
 	    add("[ntp]v[ad]{1,2}"); // beds were bad
 
@@ -201,7 +204,7 @@ public class SemanticClassifier extends Classifier {
     }
 
     private boolean isNegationNaive(final PosToken posToken) {
-	return Arrays.asList("no", "not", "didnt", "didn't", "did nt", "n't").stream().filter(s -> posToken.getRawWord().contains(s)).count() > 0;
+	return Utils.isNegationNaive(posToken);
     }
 
     private ClassificationResult classify(int[] sentimentScore) {

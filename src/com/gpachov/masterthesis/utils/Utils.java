@@ -1,10 +1,12 @@
 package com.gpachov.masterthesis.utils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import com.gpachov.masterthesis.classifiers.ClassificationResult;
 import com.gpachov.masterthesis.classifiers.DataClass;
+import com.gpachov.masterthesis.linguistics.sentencemodel.PosToken;
 
 public class Utils {
 
@@ -50,5 +52,9 @@ public class Utils {
 	    return 1.0f;
 	}
 	return 0;
+    }
+
+    public static boolean isNegationNaive(PosToken posToken) {
+	return Arrays.asList("no", "not", "didnt", "didn't", "did nt", "n't").stream().filter(s -> posToken.getRawWord().contains(s)).count() > 0;
     }
 }

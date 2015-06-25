@@ -1,5 +1,6 @@
 package com.gpachov.masterthesis.linguistics.sentencemodel;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -45,7 +46,7 @@ public class ExtractionEngineImpl implements ExtractionEngine {
     }
 
     @Override
-    public Collection<SentenceModel> extractSimplifiedSentences(String sentence) {
+    public List<SentenceModel> extractSimplifiedSentences(String sentence) {
 	SentenceModel model = new SentenceModel(sentence);
 	String sentenceModelAsRegex = createRegexModel(model);
 
@@ -83,7 +84,7 @@ public class ExtractionEngineImpl implements ExtractionEngine {
 		// results.add(new SentenceModel(simplifiedSentence));
 	    }
 	}
-	return results;
+	return new ArrayList<>(results);
     }
 
     //DEBUG
