@@ -37,6 +37,7 @@ public class SemanticClassifier extends Classifier {
 //	    add("[ntp]vdvv"); // I do not enjoy swimming
 	    add("[ntp]vdv[ad]{1,2}"); // i do not feel really good
 	    add("[ntp]v[ad]{1,2}"); // beds were bad
+	    add("[ntp]vov[ntpad]{0,2}");
 
 	    // it was in the middle
 	    // it was a circus
@@ -59,6 +60,7 @@ public class SemanticClassifier extends Classifier {
 	    add("tvn"); //this was goodness
 	    add("tva"); //this was goodness
 	    add("a{1,2}");
+	    add("vov"); //started to die
 //	    add("vn"); //hate volleyball
 	}
     };
