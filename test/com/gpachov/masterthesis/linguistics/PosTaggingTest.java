@@ -5,7 +5,6 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 
 import com.gpachov.masterthesis.linguistics.sentencemodel.PosToken;
-import com.gpachov.masterthesis.linguistics.sentencemodel.PosTokenizer;
 import com.gpachov.masterthesis.linguistics.sentencemodel.SentenceModel;
 
 public class PosTaggingTest {

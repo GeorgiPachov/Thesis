@@ -1,6 +1,6 @@
-//package com.gpachov.masterthesis.classifiers;
+//package main.java.gpachov.masterthesis.classifiers;
 //
-//import com.gpachov.masterthesis.SampleData;
+//import main.java.gpachov.masterthesis.SampleData;
 //
 //public class BagOfWordsClassifierTest extends ClassifierTest {
 //
