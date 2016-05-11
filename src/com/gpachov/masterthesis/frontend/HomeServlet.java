@@ -52,17 +52,17 @@ public class HomeServlet extends HttpServlet {
 
     @Override
     public void init() throws ServletException {
-	super.init();
-	synchronized (HomeServlet.class) {
-	    final DataPreprocessor dataPreprocessor = new DataPreprocessor(DatabaseDataProvider.getInstance());
-	    // ugly hack, too lazy to to make another class- will reuse the
-	    // generic class with instance-1
-	    final TrainingDataBuilder trainingDataBuilder = new TrainingDataBuilder(dataPreprocessor, 1);
+        super.init();
+        synchronized (HomeServlet.class) {
+            final DataPreprocessor dataPreprocessor = new DataPreprocessor(DatabaseDataProvider.getInstance());
+            // ugly hack, too lazy to to make another class- will reuse the
+            // generic class with instance-1
+            final TrainingDataBuilder trainingDataBuilder = new TrainingDataBuilder(dataPreprocessor, 1);
 
-	    // i was in a hurry
-	    TrainingData trainingData = trainingDataBuilder.iterator().next();
-	    this.classifier = new SemanticClassifier(trainingData.getAll());
-	}
+            // i was in a hurry
+            TrainingData trainingData = trainingDataBuilder.iterator().next();
+            this.classifier = new SemanticClassifier(trainingData.getAll());
+        }
     }
 
     public HomeServlet() {
@@ -72,99 +72,99 @@ public class HomeServlet extends HttpServlet {
     }
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-	setEncoding(response);
-	final long start = System.currentTimeMillis();
-	String command = request.getParameter("command");
-	String input = (request.getParameter("input"));
-	PrintWriter writer = null;
-	String output = "";
-	switch (command) {
-	case "test":
-	    output = test(input);
-//	    writer = response.getWriter();
-//	    writer.println(output);
-	    break;
-	case "analyze":
-	    output = doAnalyzeBrand(input);
-//	    writer = response.getWriter();
-//	    writer.println(analyzeOutput);
-	    break;
-	}
-	final long end = System.currentTimeMillis();
-	output += ("\nAnalysis completed in " + (end - start) + " milliseconds");
-	request.setAttribute("result", output);
-	getServletContext().getRequestDispatcher("/index.jsp").forward(request, response);
+        setEncoding(response);
+        final long start = System.currentTimeMillis();
+        String command = request.getParameter("command");
+        String input = (request.getParameter("input"));
+        PrintWriter writer = null;
+        String output = "";
+        switch (command) {
+            case "test":
+                output = test(input);
+                writer = response.getWriter();
+                writer.println(output);
+                break;
+            case "analyze":
+                output = doAnalyzeBrand(input);
+                writer = response.getWriter();
+                writer.println(output);
+                break;
+        }
+        final long end = System.currentTimeMillis();
+        output += ("\nAnalysis completed in " + (end - start) + " milliseconds");
+        request.setAttribute("result", output);
+        getServletContext().getRequestDispatcher("/index.jsp").forward(request, response);
 
     }
 
     private void setEncoding(HttpServletResponse response) {
-	response.setContentType("text/html; charset=UTF-8");
-	response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html; charset=UTF-8");
+        response.setCharacterEncoding("UTF-8");
     }
 
     private String doAnalyzeBrand(final String input) {
-	
-	StringBuilder result = new StringBuilder();
-	Map<String, ClassificationResult> allAnalyzedSentences = new LinkedHashMap<String, ClassificationResult>();
-	
-	List<RemoteSearchApiClient> remoteApiClients = new ArrayList<RemoteSearchApiClient>(){{
-	    add(new RedditClientImpl());
-	    add(new GooglePlusClientImpl());
-	}};
-	
-	List<String> allOpinions = remoteApiClients.stream().map(r -> r.getSearchResults(input)).flatMap(l -> l.stream()).collect(Collectors.toList());
-	SentenceExtractor relevanceExtractor = new LinguisticSentenceExtractor();
-	float score = 0.0f;
-	float maxScore = 0.0f;
-	TagStrippingPreprocessor tagStrip = new TagStrippingPreprocessor();
-	for (String opinion : allOpinions) {
-	    //remove non-words, links, stuff like that
-	    opinion = tagStrip.applyPreprocessing(opinion);
-	    List<String> relevantSentences = relevanceExtractor.extractRelevant(opinion, input);
-	    for (String relevantSentence : relevantSentences) {
-		relevantSentence = preprocess(relevantSentence);
-		if (new SkipEmptyOpinions().test(relevantSentence)) {
-		    final DirectSentimentAnalyzer analyzer = new DirectSentimentAnalyzer(Arrays.asList(relevantSentence));
-		    Entry<String, Pair<DataClass, ClassificationResult>> entry = analyzer.analyze(classifier, null).entrySet().iterator().next();
-		    ClassificationResult res = entry.getValue().getSecond();
-		    String sentences = entry.getKey();
-		    if (!res.equals(ClassificationResult.NEUTRAL)){
-			allAnalyzedSentences.put(sentences, res);
-			score += Utils.scoreOf(res);
-			maxScore += 1;
-		    } else if (relevantSentence.contains("noun")){
-			allAnalyzedSentences.put(sentences, res);
-		    }
-		}
-	    }
-	}
-	final float positivismScore = score / maxScore;
-	String newLine = "<br/>";
-	result.append("Analyzed " + maxScore + " opinions about " + input + newLine);
-	result.append("Positive opinions: " + positivismScore * 100 + "%" + newLine);
-	result.append("Negative opinions: " + (1 - positivismScore) * 100 + "%" + newLine);
 
-	result.append("Positive opinions about " + input + " " + newLine);
-	allAnalyzedSentences.forEach((k, v) -> {
-	    result.append(k + " => " + v + "<br/><br/>");
-	});
-	return result.toString();
+        StringBuilder result = new StringBuilder();
+        Map<String, ClassificationResult> allAnalyzedSentences = new LinkedHashMap<String, ClassificationResult>();
+
+        List<RemoteSearchApiClient> remoteApiClients = new ArrayList<RemoteSearchApiClient>() {{
+            add(new RedditClientImpl());
+            add(new GooglePlusClientImpl());
+        }};
+
+        List<String> allOpinions = remoteApiClients.stream().map(r -> r.getSearchResults(input)).flatMap(l -> l.stream()).collect(Collectors.toList());
+        SentenceExtractor relevanceExtractor = new LinguisticSentenceExtractor();
+        float score = 0.0f;
+        float maxScore = 0.0f;
+        TagStrippingPreprocessor tagStrip = new TagStrippingPreprocessor();
+        for (String opinion : allOpinions) {
+            //remove non-words, links, stuff like that
+            opinion = tagStrip.applyPreprocessing(opinion);
+            List<String> relevantSentences = relevanceExtractor.extractRelevant(opinion, input);
+            for (String relevantSentence : relevantSentences) {
+                relevantSentence = preprocess(relevantSentence);
+                if (new SkipEmptyOpinions().test(relevantSentence)) {
+                    final DirectSentimentAnalyzer analyzer = new DirectSentimentAnalyzer(Arrays.asList(relevantSentence));
+                    Entry<String, Pair<DataClass, ClassificationResult>> entry = analyzer.analyze(classifier, null).entrySet().iterator().next();
+                    ClassificationResult res = entry.getValue().getSecond();
+                    String sentences = entry.getKey();
+                    if (!res.equals(ClassificationResult.NEUTRAL)) {
+                        allAnalyzedSentences.put(sentences, res);
+                        score += Utils.scoreOf(res);
+                        maxScore += 1;
+                    } else if (relevantSentence.contains("noun")) {
+                        allAnalyzedSentences.put(sentences, res);
+                    }
+                }
+            }
+        }
+        final float positivismScore = score / maxScore;
+        String newLine = "<br/>";
+        result.append("Analyzed " + maxScore + " opinions about " + input + newLine);
+        result.append("Positive opinions: " + positivismScore * 100 + "%" + newLine);
+        result.append("Negative opinions: " + (1 - positivismScore) * 100 + "%" + newLine);
+
+        result.append("Positive opinions about " + input + " " + newLine);
+        allAnalyzedSentences.forEach((k, v) -> {
+            result.append(k + " => " + v + "<br/><br/>");
+        });
+        return result.toString();
     }
 
     private String preprocess(String relevantSentence) {
-	return new DefaultPreprocessor().applyPreprocessing(relevantSentence);
+        return new DefaultPreprocessor().applyPreprocessing(relevantSentence);
     }
 
     private String test(String input) throws IOException {
-	List<String> presentableResults = analyze(input);
-	return presentableResults.stream().collect(Collectors.joining("<br/>"));
+        List<String> presentableResults = analyze(input);
+        return presentableResults.stream().collect(Collectors.joining("<br/>"));
     }
 
     private List<String> analyze(String sentence) {
-	final DirectSentimentAnalyzer analyzer = new DirectSentimentAnalyzer(Arrays.asList(sentence));
-	List<String> presentableResults = analyzer.analyze(classifier, null).entrySet().stream().map(e -> sentence + "<br/> Positivity score  => " + e.getValue().getSecond())
-		.collect(Collectors.toList());
-	return presentableResults;
+        final DirectSentimentAnalyzer analyzer = new DirectSentimentAnalyzer(Arrays.asList(sentence));
+        List<String> presentableResults = analyzer.analyze(classifier, null).entrySet().stream().map(e -> sentence + "<br/> Positivity score  => " + e.getValue().getSecond())
+                .collect(Collectors.toList());
+        return presentableResults;
     }
 
 }

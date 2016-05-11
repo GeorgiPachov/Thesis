@@ -43,6 +43,25 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>2.18.1</version>
             </plugin>
+            <plugin>
+                <groupId>org.apache.tomcat.maven</groupId>
+                <artifactId>tomcat7-maven-plugin</artifactId>
+                <version>2.2</version>
+                <executions>
+                    <execution>
+                        <id>tomcat-run</id>
+                        <goals>
+                            <goal>exec-war-only</goal>
+                        </goals>
+                        <phase>package</phase>
+                        <configuration>
+                            <path>/FrontEnd</path>
+                            <!--<attachArtifactClassifier/>-->
+                            <!--<attachArtifactClassifierType>default value is jar</attachArtifactClassifierType>-->
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
     <dependencies>
@@ -147,6 +166,11 @@
             <artifactId>JRAW</artifactId>
             <version>0.7.0.3</version>
         </dependency>
+        <dependency>
+            <groupId>org.webjars</groupId>
+            <artifactId>bootstrap</artifactId>
+            <version>3.2.0</version>
+        </dependency>
         <!--<dependency>-->
         <!--<groupId>org.bootstrap</groupId>-->
         <!--<artifactId>org.bootstrap.jar</artifactId>-->
@@ -166,6 +190,8 @@
             <groupId>org.jaws</groupId>
             <artifactId>org.jaws.jar</artifactId>
             <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/local-libs/jaws-bin.jar</systemPath>
         </dependency>
         <!--<dependency>-->
         <!--<groupId>org.stanford</groupId>-->
