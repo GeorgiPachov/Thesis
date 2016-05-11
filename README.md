@@ -2,7 +2,13 @@
 
 A system for automated opinion gathering and sentiment analysis.
 
-Use `mvn install` to install it.
+Use 
+```
+git clone https://github.com/GeorgiPachov/Thesis.git
+cd Thesis
+mvn install:install-file -Dfile=local-libs/jaws-bin.jar -DpomFile=pom.xml
+mvn install
+```
 
 You would also need the WordNet[1] library:  
 https://wordnet.princeton.edu/
