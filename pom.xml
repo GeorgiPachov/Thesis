@@ -55,10 +55,127 @@
                         </goals>
                         <phase>package</phase>
                         <configuration>
-                            <path>/FrontEnd</path>
+                            <path>/</path>
                             <!--<attachArtifactClassifier/>-->
                             <!--<attachArtifactClassifierType>default value is jar</attachArtifactClassifierType>-->
                         </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>com.github.joelittlejohn.embedmongo</groupId>
+                <artifactId>embedmongo-maven-plugin</artifactId>
+                <version>0.3.4</version>
+                <executions>
+                    <execution>
+                        <id>start</id>
+                        <goals>
+                            <goal>start</goal>
+                        </goals>
+                        <configuration>
+                            <!--<port>37017</port>-->
+                            <!-- optional, default 27017 -->
+
+                            <randomPort>false</randomPort>
+                            <!-- optional, default is false, if true allocates a random port and overrides embedmongo.port -->
+
+                            <version>3.2.6</version>
+                            <!-- optional, default 2.2.1 -->
+
+                            <databaseDirectory>/tmp/mongotest</databaseDirectory>
+                            <!-- optional, default is a new dir in java.io.tmpdir -->
+
+                            <logging>console</logging>
+                            <!-- optional (file|console|none), default console -->
+
+                            <!--<logFile>${project.build.directory}/myfile.log</logFile>-->
+                            <!-- optional, can be used when logging=file, default is ./embedmongo.log -->
+
+                            <logFileEncoding>utf-8</logFileEncoding>
+                            <!-- optional, can be used when logging=file, default is utf-8 -->
+
+                            <!--<bindIp>127.0.0.1</bindIp>-->
+                            <!-- optional, default is to listen on all interfaces -->
+
+                            <downloadPath>http://fastdl.mongodb.org/</downloadPath>
+                            <!-- optional, default is http://fastdl.mongodb.org/ -->
+
+                            <!--<storageEngine>wiredTiger</storageEngine>-->
+                            <!--optional, one of wiredTiger or mmapv1 (default is mmapv1) -->
+
+                            <skip>false</skip>
+                            <!-- optional, skips this plugin entirely, use on the command line like -Dembedmongo.skip -->
+
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>mongo-scripts</id>
+                        <goals>
+                            <goal>mongo-scripts</goal>
+                        </goals>
+                        <configuration>
+                            <version>3.2.6</version>
+                            <!-- optional, default 2.2.1 -->
+
+                            <scriptsDirectory>...</scriptsDirectory>
+                            <!-- a directory containing scripts to run -->
+
+                            <scriptCharsetEncoding>UTF-8</scriptCharsetEncoding>
+                            <!-- optional, valid charset encoding for loading the scripts. Uses the underlying charset encoding of the platform if not assigned -->
+
+                            <databaseName>data</databaseName>
+                            <!-- the name of the database to run scripts against -->
+
+                        </configuration>
+                    </execution>
+                    <!--<execution>-->
+                        <!--<id>mongo-import</id>-->
+                        <!--<goals>-->
+                            <!--<goal>mongo-import</goal>-->
+                        <!--</goals>-->
+                        <!--<configuration>-->
+                            <!--<version>3.2.6</version>-->
+                            <!--&lt;!&ndash; optional, default 2.2.1 &ndash;&gt;-->
+
+                            <!--&lt;!&ndash;<defaultImportDatabase>test</defaultImportDatabase>&ndash;&gt;-->
+                            <!--&lt;!&ndash; optional, name of the default database to import data &ndash;&gt;-->
+
+                            <!--<parallel>false</parallel>-->
+                            <!--&lt;!&ndash; optional, default false, if true it launches in parallel all imports &ndash;&gt;-->
+
+                            <!--<wait>false</wait>-->
+                            <!--&lt;!&ndash; optional, default false, if true it will wait forever after it imports the data &ndash;&gt;-->
+
+                            <!--<imports>-->
+                                <!--<import>-->
+                                    <!--<database>my_db</database>-->
+                                    <!--&lt;!&ndash; optional, name of the database, if null it will fallback to defaultImportDatabase &ndash;&gt;-->
+
+                                    <!--<collection>col</collection>-->
+                                    <!--&lt;!&ndash; optional, collection to import data into (will use <file> to derive this otherwise) &ndash;&gt;-->
+
+                                    <!--<file>import_file.json</file>-->
+                                    <!--&lt;!&ndash; required, name of the json file to import &ndash;&gt;-->
+
+                                    <!--<upsertOnImport>true</upsertOnImport>-->
+                                    <!--&lt;!&ndash; optional, default true, if true it will do an upsert on each document imported &ndash;&gt;-->
+
+                                    <!--<dropOnImport>false</dropOnImport>-->
+                                    <!--&lt;!&ndash; optional, default true, if true it will do a drop the collection before starts to import &ndash;&gt;-->
+
+                                    <!--<timeout>10000</timeout>-->
+                                    <!--&lt;!&ndash; optional, default 20000, it will fail if it takes more than this time importing a file (time in millis) &ndash;&gt;-->
+
+                                <!--</import>-->
+                                <!--&lt;!&ndash; More imports are accepted and it will be executed in strictly order (if parallel is not set) &ndash;&gt;-->
+                            <!--</imports>-->
+                        <!--</configuration>-->
+                    <!--</execution>-->
+                    <execution>
+                        <id>stop</id>
+                        <goals>
+                            <goal>stop</goal>
+                        </goals>
                     </execution>
                 </executions>
             </plugin>

@@ -11,7 +11,7 @@
 <body
 	style="max-width: 600px; margin-left: auto; margin-right: auto; padding-top: 100px">
 	<h1>Content Analyser v 0.1</h1>
-	<form action="/analyze" method="POST">
+	<form action="${pageContext.request.contextPath}/analyze" method="POST">
 		Enter sentence to analyze: <br> <input type="text" name="input" />
 		<input type="hidden" name="command" value="test" /> <br> <input
 			type="submit" />
@@ -19,7 +19,7 @@
 	<br />
 	<hr />
 	<br />
-	<form action="/analyze" method="POST">
+	<form action="${pageContext.request.contextPath}/analyze" method="POST">
 		Enter brand to analyze opinions for:<br> <input type="text"
 			name="input" /> <input type="hidden" name="command" value="analyze" />
 		<br> <input type="submit" />
