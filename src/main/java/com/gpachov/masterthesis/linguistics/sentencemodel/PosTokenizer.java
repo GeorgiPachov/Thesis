@@ -1,5 +1,6 @@
 package com.gpachov.masterthesis.linguistics.sentencemodel;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -10,7 +11,8 @@ public class PosTokenizer {
     private static final MaxentTagger tagger;
 	static {
 		try {
-			tagger = new MaxentTagger("/home/georgi/EEworkspace/Diplomna/src/resources/models/english-left3words-distsim.tagger");
+			URL resourceUrl = Thread.currentThread().getContextClassLoader().getResource("/models/english-left3words-distsim.tagger");
+			tagger = new MaxentTagger(resourceUrl.getFile());
 		} catch (Exception e){
 			throw new RuntimeException("Could not initialize maximum entropy tagger!", e);
 		}
