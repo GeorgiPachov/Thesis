@@ -20,7 +20,7 @@
         </repository>
     </repositories>
     <build>
-        <sourceDirectory>src</sourceDirectory>
+        <sourceDirectory>src/main/java</sourceDirectory>
         <plugins>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -137,49 +137,49 @@
 
                         </configuration>
                     </execution>
-                    <!--<execution>-->
-                        <!--<id>mongo-import</id>-->
-                        <!--<goals>-->
-                            <!--<goal>mongo-import</goal>-->
-                        <!--</goals>-->
-                        <!--<configuration>-->
-                            <!--<version>3.2.6</version>-->
-                            <!--&lt;!&ndash; optional, default 2.2.1 &ndash;&gt;-->
-
-                            <!--&lt;!&ndash;<defaultImportDatabase>test</defaultImportDatabase>&ndash;&gt;-->
-                            <!--&lt;!&ndash; optional, name of the default database to import data &ndash;&gt;-->
-
-                            <!--<parallel>false</parallel>-->
-                            <!--&lt;!&ndash; optional, default false, if true it launches in parallel all imports &ndash;&gt;-->
-
-                            <!--<wait>false</wait>-->
-                            <!--&lt;!&ndash; optional, default false, if true it will wait forever after it imports the data &ndash;&gt;-->
-
-                            <!--<imports>-->
-                                <!--<import>-->
-                                    <!--<database>my_db</database>-->
-                                    <!--&lt;!&ndash; optional, name of the database, if null it will fallback to defaultImportDatabase &ndash;&gt;-->
-
-                                    <!--<collection>col</collection>-->
-                                    <!--&lt;!&ndash; optional, collection to import data into (will use <file> to derive this otherwise) &ndash;&gt;-->
-
-                                    <!--<file>import_file.json</file>-->
-                                    <!--&lt;!&ndash; required, name of the json file to import &ndash;&gt;-->
-
-                                    <!--<upsertOnImport>true</upsertOnImport>-->
-                                    <!--&lt;!&ndash; optional, default true, if true it will do an upsert on each document imported &ndash;&gt;-->
-
-                                    <!--<dropOnImport>false</dropOnImport>-->
-                                    <!--&lt;!&ndash; optional, default true, if true it will do a drop the collection before starts to import &ndash;&gt;-->
-
-                                    <!--<timeout>10000</timeout>-->
-                                    <!--&lt;!&ndash; optional, default 20000, it will fail if it takes more than this time importing a file (time in millis) &ndash;&gt;-->
-
-                                <!--</import>-->
-                                <!--&lt;!&ndash; More imports are accepted and it will be executed in strictly order (if parallel is not set) &ndash;&gt;-->
-                            <!--</imports>-->
-                        <!--</configuration>-->
-                    <!--</execution>-->
+                    <execution>
+                        <id>mongo-import</id>
+                        <goals>
+                            <goal>mongo-import</goal>
+                        </goals>
+                        <configuration>
+                            <version>3.2.6</version>
+                            <!-- optional, default 2.2.1 -->
+<!---->
+                            <defaultImportDatabase>data</defaultImportDatabase>
+                            <!-- optional, name of the default database to import data -->
+<!---->
+                            <parallel>false</parallel>
+                            <!-- optional, default false, if true it launches in parallel all imports -->
+<!---->
+                            <wait>false</wait>
+                            <!-- optional, default false, if true it will wait forever after it imports the data -->
+<!---->
+                            <imports>
+                                <import>
+                                    <database>data</database>
+                                    <!-- optional, name of the database, if null it will fallback to defaultImportDatabase -->
+<!---->
+                                    <collection>opinions</collection>
+                                    <!-- optional, collection to import data into (will use <file> to derive this otherwise) -->
+<!---->
+                                    <file>training-set.json</file>
+                                    <!-- required, name of the json file to import -->
+<!---->
+                                    <upsertOnImport>true</upsertOnImport>
+                                    <!-- optional, default true, if true it will do an upsert on each document imported -->
+<!---->
+                                    <dropOnImport>false</dropOnImport>
+                                    <!-- optional, default true, if true it will do a drop the collection before starts to import -->
+<!---->
+                                    <timeout>10000</timeout>
+                                    <!-- optional, default 20000, it will fail if it takes more than this time importing a file (time in millis) -->
+<!---->
+                                </import>
+                                <!-- More imports are accepted and it will be executed in strictly order (if parallel is not set) -->
+                            </imports>
+                        </configuration>
+                    </execution>
                     <execution>
                         <id>stop</id>
                         <goals>
@@ -367,6 +367,11 @@
             <groupId>com.google.http-client</groupId>
             <artifactId>google-http-client-jackson2</artifactId>
             <version>${project.http.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
         </dependency>
     </dependencies>
     <properties>
