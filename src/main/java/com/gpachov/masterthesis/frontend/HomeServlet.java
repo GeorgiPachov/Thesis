@@ -67,13 +67,9 @@ public class HomeServlet extends HttpServlet {
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         setEncoding(response);
-        response.getOutputStream().println("TEST TEST TEST");
         final long start = System.currentTimeMillis();
         String command = request.getParameter("command");
         String input = (request.getParameter("input"));
-        response.getOutputStream().println(command);
-        response.getOutputStream().println(input);
-
 
         PrintWriter writer = null;
         String output = "";
